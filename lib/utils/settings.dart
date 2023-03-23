@@ -32,6 +32,7 @@ List<Color> brandColors1 = [Colors.black, Colors.black];
 
 // Permsission Vars
 List<Contact>? contacts = [];
+List<Contact>? searchContacts = [];
 bool allowLoadContacts = false;
 bool allowLoadDialer = true;
 bool allowBluetooth = false;
