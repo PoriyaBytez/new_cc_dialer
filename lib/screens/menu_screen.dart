@@ -60,8 +60,9 @@ class _MenuScreenState extends State<MenuScreen> {
             leading: const Icon(FontAwesomeIcons.whatsapp, color: Colors.green),
             title: const Text("Whatsapp Us", style: TextStyle(fontSize: 17)),
             onTap: () {
-              // FlutterOpenWhatsapp.sendSingleMessage(supportWhatsappNumber,
-              //     "My Account Number is: $sipUsername. My Name is: +$accountUsername. My Cell Number is: +$userCountryCode$userCellNumber. Find my message below :");
+              var whatsappUrl =
+                  "whatsapp://send?phone=$supportWhatsappNumber" "&text=${Uri.encodeComponent("My Account Number is: $sipUsername. My Name is: $accountUsername. My Cell Number is: +$userCountryCode$userCellNumber. Find my message below :")}";
+              launch(whatsappUrl);
             },
           ),
           const Divider(height: 2,color: Colors.blue,),
@@ -87,7 +88,7 @@ class _MenuScreenState extends State<MenuScreen> {
             title: const Text("Privacy Policy", style: TextStyle(fontSize: 17)),
             onTap: () {
               // BuildContext context;
-              Navigator.pushNamed(context, '/TsCs');//'/TsCs'
+              Navigator.pushNamed(context, '/TsCs');
             },
           ),
           const Divider(height: 2,color: Colors.blue,),
@@ -95,7 +96,7 @@ class _MenuScreenState extends State<MenuScreen> {
             alignment: FractionalOffset.bottomLeft,
             child: ListTile(
               title: Text(
-                "Version 4(1.0.0)",
+                "Version 1.0",
                 style: TextStyle(
                   color: Colors.blue,
                   fontSize: 12,
