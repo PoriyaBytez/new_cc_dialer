@@ -43,13 +43,11 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-
     // bloc = HomeModule.to.getBloc<HomeBloc>();
     super.initState();
   }
 
   filterContact() {
-
     if (_cSearch.text.isNotEmpty) {
       contacts!.retainWhere((element) {
         String search = _cSearch.text.toLowerCase();
@@ -60,21 +58,15 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-
   void _onTapDown(TapDownDetails details) {
     _tapPosition = details.globalPosition;
   }
 
-  checkContactPermission() async {
-
-  }
-
   @override
   Widget build(BuildContext context) {
-    // bloc.getListContact();
     return Scaffold(
         backgroundColor: const Color(0xfff0f8ff),
-        appBar:   PreferredSize(
+        appBar: PreferredSize(
             preferredSize: const Size(double.infinity, kToolbarHeight / 0.99),
             child: AppBar(
               automaticallyImplyLeading: false,
@@ -111,8 +103,8 @@ class _HomePageState extends State<HomePage> {
                           ),
                           autofocus: true,
                           onChanged: (value) {
-                            filterContact();
                             setState(() {
+                              onSearchTextChanged(value);
                               searching = true;
                             });
                           },
@@ -122,7 +114,6 @@ class _HomePageState extends State<HomePage> {
                               hintText: "Search Contacts",
                               hintStyle: TextStyle(color: Colors.white)),
                         );
-
                       } else {
                         _cSearch.clear();
                         searching = false;
@@ -168,94 +159,210 @@ class _HomePageState extends State<HomePage> {
                   center: const Text("Loading..."),
                 ),
               ))
-        : contacts!.isEmpty ? Center(child: Text("No Data Found")) :
-             CupertinoScrollbar(
-                thickness: 6,
-                thicknessWhileDragging: 9,
-                child: ListView.builder(
-                  itemCount: contacts!.length,
-                  itemBuilder: (BuildContext context, index) {
-                    print('contacts length ==> ${contacts?.length}');
-                    Contact? c = contacts?.elementAt(index);
-                    print("name ==> ${c?.displayName}");
-                    return GestureDetector(
-                      onTapDown: _onTapDown,
-                      onLongPress: () {
-                        showMenu(
-                          context: context,
-                          items: [
-                            PopupMenuItem(
-                              child: TextButton(
-                                child: Column(children: const <Widget>[
-                                  Icon(Icons.phone),
-                                  Text(
-                                    "Call",
-                                    style: TextStyle(fontSize: 16),
-                                  ),
-                                ]),
-                                onPressed: () {
-                                  // bloc.setContact(item);
-                                  String? phoneNumber = (c?.phones.length != 0) ?
-                                      c?.phones.elementAt(0).number : '  ';
-                                  if (!mounted) return;
-                                  dest = phoneNumber
-                                      ?.replaceAll(' ', '')
-                                      .replaceAll('+', '00')
-                                      .toString();
+            : contacts!.isEmpty
+                ? Center(child: Text("No Data Found"))
+                : CupertinoScrollbar(
+                    thickness: 6,
+                    thicknessWhileDragging: 9,
+                    child: searchContacts?.length != 0 ||
+                            _cSearch.text.isNotEmpty
+                        ? ListView.builder(
+                            itemCount: searchContacts!.length,
+                            itemBuilder: (BuildContext context, index) {
+                              print('contacts length ==> ${searchContacts?.length}');
+                              Contact? c = searchContacts?.elementAt(index);
+                              print("name ==> ${c?.displayName}");
+                              return GestureDetector(
+                                onTapDown: _onTapDown,
+                                onLongPress: () {
+                                  showMenu(
+                                    context: context,
+                                    items: [
+                                      PopupMenuItem(
+                                        child: TextButton(
+                                          child:
+                                              Column(children: const <Widget>[
+                                            Icon(Icons.phone),
+                                            Text(
+                                              "Call",
+                                              style: TextStyle(fontSize: 16),
+                                            ),
+                                          ]),
+                                          onPressed: () {
+                                            // bloc.setContact(item);
+                                            String? phoneNumber =
+                                                (c?.phones.length != 0)
+                                                    ? c?.phones
+                                                        .elementAt(0)
+                                                        .number
+                                                    : '  ';
+                                            if (!mounted) return;
+                                            dest = phoneNumber
+                                                ?.replaceAll(' ', '')
+                                                .replaceAll('+', '00')
+                                                .toString();
 
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => BottomNavBar(),
-                                      ));
+                                            Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      BottomNavBar(),
+                                                ));
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                    position: RelativeRect.fromRect(
+                                      _tapPosition! & const Size(40, 40),
+                                      // smaller rect, the touch area
+                                      // Offset.zero & overlay!.size, // Bigger rect, the entire screen
+                                      Rect.zero,
+                                    ),
+                                  );
                                 },
-                              ),
-                            ),
-                          ],
-                          position: RelativeRect.fromRect(
-                            _tapPosition! & const Size(40, 40),
-                            // smaller rect, the touch area
-                            // Offset.zero & overlay!.size, // Bigger rect, the entire screen
-                            Rect.zero,
+                                child: SizedBox(
+                                  width: MediaQuery.of(context).size.width,
+                                  child: ListTile(
+                                    contentPadding: const EdgeInsets.symmetric(
+                                        horizontal: 20.0),
+                                    leading: CircleAvatar(
+                                      child: Text(
+                                        "${c?.displayName.substring(0, 1).toUpperCase()}",
+                                        style: const TextStyle(
+                                            fontSize: 26,
+                                            color: Colors.white60),
+                                      ),
+                                    ),
+                                    title: Text(
+                                      "${c?.displayName}",
+                                      style: const TextStyle(fontSize: 17),
+                                    ),
+                                    subtitle: (c?.phones.length != 0)
+                                        ? Text(
+                                            "${c?.phones.elementAt(0).number}",
+                                          )
+                                        : null,
+                                    onTap: () {
+                                      // bloc.setContact(item);
+                                      print('item ==> ${c?.displayName}');
+                                      print('index ==> ${index}');
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => ViewPage(c!)),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              );
+                            },
+                          )
+                        : ListView.builder(
+                            itemCount: contacts!.length,
+                            itemBuilder: (BuildContext context, index) {
+                              print('contacts length ==> ${contacts?.length}');
+                              Contact? c = contacts?.elementAt(index);
+                              print("name ==> ${c?.displayName}");
+                              return GestureDetector(
+                                onTapDown: _onTapDown,
+                                onLongPress: () {
+                                  showMenu(
+                                    context: context,
+                                    items: [
+                                      PopupMenuItem(
+                                        child: TextButton(
+                                          child:
+                                              Column(children: const <Widget>[
+                                            Icon(Icons.phone),
+                                            Text(
+                                              "Call",
+                                              style: TextStyle(fontSize: 16),
+                                            ),
+                                          ]),
+                                          onPressed: () {
+                                            // bloc.setContact(item);
+                                            String? phoneNumber =
+                                                (c?.phones.length != 0)
+                                                    ? c?.phones
+                                                        .elementAt(0)
+                                                        .number
+                                                    : '  ';
+                                            if (!mounted) return;
+                                            dest = phoneNumber
+                                                ?.replaceAll(' ', '')
+                                                .replaceAll('+', '00')
+                                                .toString();
+
+                                            Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      BottomNavBar(),
+                                                ));
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                    position: RelativeRect.fromRect(
+                                      _tapPosition! & const Size(40, 40),
+                                      // smaller rect, the touch area
+                                      // Offset.zero & overlay!.size, // Bigger rect, the entire screen
+                                      Rect.zero,
+                                    ),
+                                  );
+                                },
+                                child: SizedBox(
+                                  width: MediaQuery.of(context).size.width,
+                                  child: ListTile(
+                                    contentPadding: const EdgeInsets.symmetric(
+                                        horizontal: 20.0),
+                                    leading: CircleAvatar(
+                                      child: Text(
+                                        "${c?.displayName?.substring(0, 1).toUpperCase()}",
+                                        style: const TextStyle(
+                                            fontSize: 26,
+                                            color: Colors.white60),
+                                      ),
+                                    ),
+                                    title: Text(
+                                      "${c?.displayName}",
+                                      style: const TextStyle(fontSize: 17),
+                                    ),
+                                    subtitle: (c?.phones.length != 0)
+                                        ? Text(
+                                            "${c?.phones.elementAt(0).number}",
+                                          )
+                                        : null,
+                                    onTap: () {
+                                      // bloc.setContact(item);
+                                      print('item ==> ${c?.displayName}');
+                                      print('index ==> ${index}');
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => ViewPage(c!)),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              );
+                            },
                           ),
-                        );
-                      },
-                      child: SizedBox(
-                        width: MediaQuery.of(context).size.width,
-                        child: ListTile(
-                          contentPadding:
-                              const EdgeInsets.symmetric(horizontal: 20.0),
-                          leading: CircleAvatar(
-                            child: Text(
-                              "${c?.displayName?.substring(0, 1).toUpperCase()}",
-                              style: const TextStyle(
-                                  fontSize: 26, color: Colors.white60),
-                            ),
-                          ),
-                          title: Text(
-                            "${c?.displayName}",
-                            style: const TextStyle(fontSize: 17),
-                          ),
-                          subtitle: (c?.phones.length != 0)
-                              ? Text(
-                                  "${c?.phones.elementAt(0).number}",
-                                )
-                              : null,
-                          onTap: () {
-                            // bloc.setContact(item);
-                            print('item ==> ${c?.displayName}');
-                            print('index ==> ${index}');
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => ViewPage(c!)),
-                            );
-                          },
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ));
+                  ));
+  }
+
+  onSearchTextChanged(String text) async {
+    searchContacts?.clear();
+    if (text.isEmpty) {
+      setState(() {});
+      return;
+    }
+
+    contacts?.forEach((userDetail) {
+      if (userDetail.displayName.toLowerCase().contains(text.toLowerCase()) || userDetail.displayName.toUpperCase().contains(text.toUpperCase()))
+        searchContacts?.add(userDetail);
+    });
+
+    setState(() {});
   }
 }
