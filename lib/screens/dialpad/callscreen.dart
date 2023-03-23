@@ -5,6 +5,7 @@ import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:proximity_screen_lock/proximity_screen_lock.dart';
 import 'package:sip_ua/sip_ua.dart';
 import '../../callscreen_loader.dart';
+import '../../utils/settings.dart';
 import 'widgets/action_button.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
@@ -21,9 +22,7 @@ class CallScreenWidget extends StatefulWidget {
 
 class _MyCallScreenWidget extends State<CallScreenWidget>
     implements SipUaHelperListener {
-  List<Contact> contacts = [];
-  List<Contact> contactsFiltered = [];
-  List<Contact> contactData = [];
+
 
   bool _audioMuted = false;
   String? _contactName;
@@ -75,9 +74,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
     }
 
     switch (callState.state) {
-      case CallStateEnum.STREAM:
-        _handelStreams(callState);
-        break;
+
       case CallStateEnum.ENDED:
       case CallStateEnum.FAILED:
         _backToDialPad();
@@ -93,6 +90,9 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
       case CallStateEnum.NONE:
 
       case CallStateEnum.CALL_INITIATION:
+      case CallStateEnum.STREAM:
+        _handelStreams(callState);
+        break;
       case CallStateEnum.REFER:
         break;
     }
@@ -183,7 +183,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
     MediaStream? stream = event.stream;
     if (event.originator == 'local') {
       if (_localRenderer != null) {
-        _localRenderer?.srcObject = stream;
+        _localRenderer!.srcObject = stream;
       }
       if (!kIsWeb && !WebRTC.platformIsDesktop) {
         event.stream?.getAudioTracks().first.enableSpeakerphone(false);
@@ -287,25 +287,22 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
     });
   }
 
-  void _toggleSpeaker() {
-    if (_localStream != null) {
-      print("_toggleSpeaker is called");
+  _toggleSpeaker() {
       setState(() {
         _speakerOn = !_speakerOn;
       });
-      _localStream!.getAudioTracks()[0].enableSpeakerphone(_speakerOn);
+      print("speaker ==> $_speakerOn");
+      _localStream?.getAudioTracks().first.enableSpeakerphone(_speakerOn);
       InCallService().proximity(_speakerOn);
-    }
   }
 
   //#########################################################################################################################################
   String flattenPhoneNumber(String phoneStr) {
     phoneStr = phoneStr.toString().replaceFirst("00", "");
-    print("phoneStr ==> $phoneStr");
     phoneStr = phoneStr.toString().replaceFirst("+", "");
-    var re = RegExp(r'\d{3}'); // replace two digits
+    var re = RegExp(r'\d{2}'); // replace two digits
     phoneStr = phoneStr.replaceFirst(re, '');
-    return phoneStr.replaceAllMapped(RegExp(r'^(\+)|\D'), (Match m) {
+    return phoneStr.replaceAllMapped(RegExp(r'^(\+)|\D'),(Match m) {
       return m[0] == "+" ? "+" : "";
     });
   }
@@ -318,54 +315,27 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
     });
   }
 
-//######################################################################################################################################
-  getAllContacts() async {
-
-    contacts =
-        (await FlutterContacts.getContacts(withPhoto: false,withProperties: true)).toList();
-
-    //mount is slowing down things
-    if (mounted) {
-      if (!mounted) return;
-      setState(() {
-        contactData = contacts;
-      });
-    }
-  }
-
-//###########################################################################################################################################
-
   String? _filterContacts(String? callednum) {
     String searchTermFlatten = flattenPhoneNumber(callednum ?? "");
-    print("searchTermFlatten ==> $searchTermFlatten");
     String? phnFlattened;
     bool numFound = false;
+    String? numTest1;
     String? numTest2;
     String? result;
 
-    // if ((_contacts.length > 0) && (_contacts.length < 2)) {
-    //   String wetest = _contacts[0].phones.toString();
-    //   if (wetest.isNotEmpty) {
-    //     wetest = _contacts[0].phones!.elementAt(0).value.toString() == null
-    //         ? _contacts[0].phones!.elementAt(1).value.toString()
-    //         : _contacts[0].phones!.elementAt(0).value.toString();
-    //     if (wetest == callednum) result = _contacts[0].displayName;
-    //   }
-    // }
-
-    if (contactData.isNotEmpty) {
-      for (var i = 0; i < contactData.length; i++) {
-        if (contactData[i].phones.isNotEmpty) {
-          if (contactData[i].phones.elementAt(0).number.isNotEmpty) {
-            numTest2 = contactData[i].phones.elementAt(0).number;
-            phnFlattened = flattenContactNumber(numTest2);
-          } if (contactData[i].phones.length == 2) {
-            numTest2 = contactData[i].phones.elementAt(1).number;
+    if (contacts!.isNotEmpty) {
+      for (var i = 0; i < contacts!.length; i++) {
+        if (contacts![i].phones.isNotEmpty) {
+          if (contacts![i].phones.elementAt(0).number.isNotEmpty) {
+            numTest1 = contacts![i].phones.elementAt(0).number;
+            phnFlattened = flattenContactNumber(numTest1);
+          }else if (contacts![i].phones.length > 1) {
+            numTest2 = contacts![i].phones.elementAt(1).number;
             phnFlattened = flattenContactNumber(numTest2);
           }
 
           if (phnFlattened!.contains(searchTermFlatten)) {
-            result = contactData[i].displayName;
+            result = contacts![i].displayName;
             numFound = true;
             break;
           }
@@ -492,7 +462,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
             setState(() {
               _speakerOn = true;
               _toggledOnce = true;
-              _toggleSpeaker();
+              // _toggleSpeaker();
             });
           }
         } else {
@@ -568,7 +538,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
             setState(() {
               _speakerOn = true;
               _toggledOnce = true;
-              _toggleSpeaker();
+              // _toggleSpeaker();
             });
           }
         } else {
