@@ -339,6 +339,7 @@ class _HomePageState extends State<HomePage> {
         ));
   }
 
+
   onSearchTextChanged(String text) async {
     searchContacts.clear();
     if (text.isEmpty) {
