@@ -312,7 +312,7 @@ class _SignUpPageState extends State<SignUpPage> {
                             ]),
                         child: Center(
                           child: Text((_residence != null)
-                              ? " ${_cCode}  ${_cName}"
+                              ? "+${_cCode}  ${_cName}"
                               : "Select Country",style: TextStyle(fontSize: 16,fontWeight: FontWeight.w300)),
                         ),
                       ),

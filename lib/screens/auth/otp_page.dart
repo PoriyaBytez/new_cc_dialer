@@ -171,10 +171,10 @@ class _OtpPageState extends State<OtpPage> {
         },
         bodyEncoding: RequestBodyEncoding.JSON,
         timeoutSeconds: 3000);
-
+    print('result == ${result.body}');
     if (result.success) {
+
       if ((json.decode(result.content()).containsKey("payload"))) {
-        // element.displayName.toString() != null;
         setState(() {
           otpIsCorrect = true;
           String _accountUsername = (json.decode(result.content())['payload']
@@ -303,7 +303,7 @@ class _OtpPageState extends State<OtpPage> {
   }
 
 //#################################################################################################################################
-  _apiChooser(String? signorLog) {
+  _apiChooser(String? signorLog) async {
     (signorLog == 'login')
         ? _logInAPI(userCountryCode, userCellNumber)
         : _signUpAPI(userFullname, userCountryCode, userCellNumber, userEmail,
@@ -314,6 +314,9 @@ class _OtpPageState extends State<OtpPage> {
     (signorLog == 'login')
         ? _displaylinkNav = '/Login'
         : _displaylinkNav = '/SignUp';
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('countryCode', userCountryCode!);
+    prefs.setString('countryCellNumber', userCellNumber!);
   }
 
 //########################################################################################################################################################################

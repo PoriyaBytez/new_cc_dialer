@@ -96,8 +96,8 @@ class appcolor {
   static const Color dialmainbackground = Color(0xfff0f8ff);
 }
 getAllContacts() async {
-  contacts = await FlutterContacts.getContacts(
-      withPhoto: false, withProperties: true);
+  contacts = await FlutterContacts.getContacts(withPhoto: false, withProperties: true);
+  FlutterContacts.config.includeNotesOnIos13AndAbove = true;
   print("contacts bottom ${contacts!.length}");
 
 }

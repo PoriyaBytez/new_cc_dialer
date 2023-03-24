@@ -74,6 +74,7 @@ class _MyDialPadWidget extends State<DialPadWidget>
         sipPassword!.isNotEmpty) {
       _wsUri.text = 'wss://$sipUrl/ws';
       _sipUri.text = '$sipUsername@$sipUrl';
+      print('_sipUri ==> ${_sipUri.text}');
       _displayName.text = '$sipCallerID';
       _password.text = '$sipPassword';
       _authorizationUser.text = sipUsername!;
@@ -167,17 +168,13 @@ class _MyDialPadWidget extends State<DialPadWidget>
         MediaStream userStream =
             await navigator.mediaDevices.getUserMedia(mediaConstraints);
         mediaStream.addTrack(userStream.getAudioTracks()[0], addToNative: true);
-      } else {
-        mediaConstraints['video'] = !voiceonly;
-        mediaStream =
-            await navigator.mediaDevices.getUserMedia(mediaConstraints);
       }
 
       dest = textController.text; //replaceFirst('00', '')
       _lastDialed = textController.text;
       _preferences!.setString('dest', dest!);
       helper!.call(dest!.replaceFirst('00', ''),
-          voiceonly: voiceonly, mediaStream: mediaStream); //voiceonly
+          voiceonly: voiceonly); //voiceonly
       ProximityScreenLock.setActive(true);
       return null;
     }
