@@ -345,7 +345,6 @@ class _HomePageState extends State<HomePage> {
       setState(() {});
       return;
     }
-
     contacts?.forEach((userDetail) {
       if (userDetail.displayName.toLowerCase().contains(text.toLowerCase()) || userDetail.displayName.toUpperCase().contains(text.toUpperCase()))
         searchContacts.add(userDetail);
