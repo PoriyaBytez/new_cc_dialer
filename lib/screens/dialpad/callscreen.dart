@@ -292,7 +292,13 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
         _speakerOn = !_speakerOn;
       });
       print("speaker ==> $_speakerOn");
-      _localStream?.getAudioTracks().first.enableSpeakerphone(_speakerOn);
+        if (_localStream?.getAudioTracks().isNotEmpty ?? false) {
+          _localStream
+              ?.getAudioTracks()
+              .first
+              .enableSpeakerphone(_speakerOn);
+      }
+      // _localStream?.getAudioTracks().first.enableSpeakerphone(_speakerOn);
       InCallService().proximity(_speakerOn);
   }
 
@@ -329,10 +335,11 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
           if (contacts![i].phones.elementAt(0).number.isNotEmpty) {
             numTest1 = contacts![i].phones.elementAt(0).number;
             phnFlattened = flattenContactNumber(numTest1);
-          }else if (contacts![i].phones.length > 1) {
+          }
+          /*else if (contacts![i].phones.length > 1) {
             numTest2 = contacts![i].phones.elementAt(1).number;
             phnFlattened = flattenContactNumber(numTest2);
-          }
+          }*/
 
           if (phnFlattened!.contains(searchTermFlatten)) {
             result = contacts![i].displayName;
