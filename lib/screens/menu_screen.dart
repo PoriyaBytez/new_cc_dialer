@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -69,13 +71,16 @@ class _MenuScreenState extends State<MenuScreen> {
             leading: const Icon(FontAwesomeIcons.whatsapp, color: Colors.green),
             title: const Text("Whatsapp Us", style: TextStyle(fontSize: 17)),
             onTap: () async {
-              print("sipUsername ==> ${sipUsername}");
               _preferences = await SharedPreferences.getInstance();
               String? countryCode = _preferences!.getString('countryCode');
               String? cellNumber = _preferences!.getString('countryCellNumber');
-              var whatsappUrl = "whatsapp://send?phone=$supportWhatsappNumber"
-                  "&text=${Uri.encodeComponent("My Account Number is: $sipUsername. My Name is: $accountUsername. My Cell Number is: +$userCountryCode$userCellNumber. Find my message below :")}";
-              launchUrlString(whatsappUrl);
+              var whatsAppUrlAndroid = "whatsapp://send?phone=$supportWhatsappNumber""&text=${Uri.encodeComponent("My Account Number is: $sipUsername. My Name is: $accountUsername. My Cell Number is: +$countryCode$cellNumber  . Find my message below :")}";
+               var whatsAppUralIos="https://wa.me/$supportWhatsappNumber?text=${Uri.encodeComponent("My Account Number is: $sipUsername. My Name is: $accountUsername. My Cell Number is: +$countryCode$cellNumber  . Find my message below :")}";
+              if(Platform.isIOS) {
+                launchUrlString(whatsAppUralIos);
+              }else{
+                launchUrlString(whatsAppUrlAndroid);
+              }
             },
           ),
           const Divider(
