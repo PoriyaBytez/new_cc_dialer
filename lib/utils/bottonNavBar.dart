@@ -30,7 +30,6 @@ class BottomNavBar extends StatefulWidget {
 }
 
 class _BottomNavBarState extends State<BottomNavBar> {
-  bool? _allowBackButton;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   var listener;
@@ -45,25 +44,9 @@ class _BottomNavBarState extends State<BottomNavBar> {
   @override
   void initState() {
     super.initState();
-    initPlatformState();
     askPermission();
-    getAllContacts();
   }
 
-
-  //############################################################################################################
-  Future<void> initPlatformState() async {
-    String platformVersion;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    // try {
-    //   platformVersion = await FlutterOpenWhatsapp.platformVersion;
-    // } on PlatformException {
-    //   platformVersion = 'Failed to get platform version.';
-    // }
-    if (!mounted) return;
-    if (!mounted) return;
-    setState(() {});
-  }
 
 //############################################################################################################
 
@@ -116,6 +99,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
       setState(() {
         isCheck = true;
       });
+      getAllContacts();
       return true;
     }
   }
@@ -177,50 +161,91 @@ class _BottomNavBarState extends State<BottomNavBar> {
     return Future.value(val);
   }
 
+
+
+
   Future<bool> myDialog() async {
-    Alert(
-      context: _scaffoldKey.currentContext!,
-      type: AlertType.warning,
-      title: "CONFIRMATION REQUIRED !",
-      desc: "Do you really want to close this application !",
-      buttons: [
-        DialogButton(
-          onPressed: () {
-            if (!mounted) return;
-            setState(() {
-              _allowBackButton = false;
-            });
-            Navigator.of(context, rootNavigator: true).pop();
-          },
-          gradient: LinearGradient(
-            colors: brandColors3,
-          ),
-          child: const Text(
-            "NO",
-            style: TextStyle(color: Colors.white, fontSize: 20),
-          ),
-        ),
-        DialogButton(
-          onPressed: () {
-            if (!mounted) return;
-            setState(() {
-              _allowBackButton = true;
-            });
-            SystemNavigator.pop();
-          },
-          gradient: LinearGradient(
-            colors: brandColors3,
-          ),
-          child: const Text(
-            "YES",
-            style: TextStyle(color: Colors.white, fontSize: 20),
-          ),
-        )
-      ],
-    ).show();
-    _allowBackButton! ? _allowBackButton = true : _allowBackButton = false;
-    return Future.value(_allowBackButton);
+    return await showDialog( //show confirm dialogue
+      //the return value will be from "Yes" or "No" options
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text( "CONFIRMATION REQUIRED !"),
+        content: Text("Do you really want to close this application !"),
+        actions:[
+          Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+            Expanded(
+              child: DialogButton(
+                onPressed: () {
+                  Navigator.of(context).pop(false);
+                },
+                gradient: LinearGradient(
+                  colors: brandColors3,
+                ),
+                child: const Text(
+                  "NO",
+                  style: TextStyle(color: Colors.white, fontSize: 20),
+                ),
+              ),
+            ),
+
+            Expanded(
+              child: DialogButton(
+                onPressed: () {
+                  Navigator.of(context).pop(true);
+                },
+                gradient: LinearGradient(
+                  colors: brandColors3,
+                ),
+                child: const Text(
+                  "YES",
+                  style: TextStyle(color: Colors.white, fontSize: 20),
+                ),
+              ),
+            )
+          ],)
+
+
+        ],
+      ),
+    )??false; //if showDialouge had returned null, then return false
   }
+
+  // Future<bool> myDialog() async {
+  //   Alert(
+  //     context: _scaffoldKey.currentContext!,
+  //     type: AlertType.warning,
+  //     title: "CONFIRMATION REQUIRED !",
+  //     desc: "Do you really want to close this application !",
+  //     buttons: [
+  //       DialogButton(
+  //         onPressed: () {
+  //           Navigator.of(context).pop(false);
+  //         },
+  //         gradient: LinearGradient(
+  //           colors: brandColors3,
+  //         ),
+  //         child: const Text(
+  //           "NO",
+  //           style: TextStyle(color: Colors.white, fontSize: 20),
+  //         ),
+  //       ),
+  //       DialogButton(
+  //         onPressed: () {
+  //          Navigator.of(context).pop(true);
+  //         },
+  //         gradient: LinearGradient(
+  //           colors: brandColors3,
+  //         ),
+  //         child: const Text(
+  //           "YES",
+  //           style: TextStyle(color: Colors.white, fontSize: 20),
+  //         ),
+  //       )
+  //     ],
+  //   ).show();
+  //
+  // }
 
 
   @override
@@ -242,7 +267,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
           bottomNavigationBar: SizedBox(
             height: 60,
             child: Padding(
-              padding: const EdgeInsets.only(left: 10, right: 10),
+              padding: const EdgeInsets.only(left: 10, right: 10,bottom: 10),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [

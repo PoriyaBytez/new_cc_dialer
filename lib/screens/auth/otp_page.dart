@@ -171,9 +171,8 @@ class _OtpPageState extends State<OtpPage> {
         },
         bodyEncoding: RequestBodyEncoding.JSON,
         timeoutSeconds: 3000);
-    print('result == ${result.body}');
     if (result.success) {
-
+      print('result == ${result.body}');
       if ((json.decode(result.content()).containsKey("payload"))) {
         setState(() {
           otpIsCorrect = true;
@@ -246,13 +245,14 @@ class _OtpPageState extends State<OtpPage> {
           "full_name": _name,
           "country_code": _ccode,
           "phone_number": _cellNum,
-          "email": _eemail,
-          "company_name": _compName
+          "email": _eemail
         },
         bodyEncoding: RequestBodyEncoding.JSON,
         timeoutSeconds: 3000);
+    print('sinup result success==> ${result.body} ');
 
     if (result.success) {
+
       if ((json.decode(result.content()).containsKey("action"))) {
         var _routeAction = (json.decode(result.content())['action']).toString();
         if (_routeAction == 'LogIN') {
@@ -260,6 +260,8 @@ class _OtpPageState extends State<OtpPage> {
               " The Mobile Number or Email provided already exists, Please try Log-In instead";
           myDialog(_message, '/Login');
         }else{
+          print('sinup result else==> ${result.body} ');
+
           Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
             return BottomNavBar();
           },));
@@ -414,7 +416,6 @@ class _OtpPageState extends State<OtpPage> {
                         selectedDecoration: BoxDecoration(
                             // borderSide: BorderSide.none,
                             borderRadius: BorderRadius.circular(10)),
-
                         onChange: (code) {
                           Provider.of<AuthService>(context, listen: false);
                           setState(() {

@@ -124,9 +124,9 @@ class _HomePageState extends State<HomePage> {
                         );
                       }
                     });
-                    getAllContacts();
                   },
                 ),
+
                 IconButton(
                     icon: const Icon(
                       Icons.refresh,
@@ -338,7 +338,6 @@ class _HomePageState extends State<HomePage> {
           ),
         ));
   }
-
 
   onSearchTextChanged(String text) async {
     searchContacts.clear();

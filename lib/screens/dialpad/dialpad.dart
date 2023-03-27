@@ -24,6 +24,7 @@ class DialPadWidget extends StatefulWidget {
 class _MyDialPadWidget extends State<DialPadWidget>
     implements SipUaHelperListener {
   String? testBal;
+  String? text = "Enter Number";
   String? _lastDialed;
   String? receivedMsg;
   final TextEditingController _password = TextEditingController();
@@ -73,11 +74,16 @@ class _MyDialPadWidget extends State<DialPadWidget>
         sipPassword != null &&
         sipPassword!.isNotEmpty) {
       _wsUri.text = 'wss://$sipUrl/ws';
+      print('_wsUri ==> ${_wsUri.text}');
       _sipUri.text = '$sipUsername@$sipUrl';
       print('_sipUri ==> ${_sipUri.text}');
       _displayName.text = '$sipCallerID';
+      print('_displayName ==> ${_displayName.text}');
       _password.text = '$sipPassword';
+      print('_password ==> ${_password.text}');
       _authorizationUser.text = sipUsername!;
+      print('_authorizationUser ==> ${_authorizationUser.text}');
+
     } else {
       _wsUri.text = _preferences!.getString('ws_uri')!;
       _sipUri.text = _preferences!.getString('sip_uri')!;
@@ -352,7 +358,7 @@ class _MyDialPadWidget extends State<DialPadWidget>
               children: <Widget>[
                 SizedBox(
                   width: 350,
-                  child: TextField(
+                  child: TextField(onTap: () => text='',
                     keyboardType: TextInputType.number,
                     inputFormatters: [
                       LengthLimitingTextInputFormatter(15),
@@ -366,9 +372,10 @@ class _MyDialPadWidget extends State<DialPadWidget>
                     cursorColor: Colors.red[900],
                     textAlign: TextAlign.center,
                     style: const TextStyle(fontSize: 34, color: Colors.black54),
-                    decoration: const InputDecoration(
+                    decoration:  InputDecoration(
                       border: InputBorder.none,
-                      hintText: "Enter Number"
+                      hintText: text,
+                      hintStyle: TextStyle(color: Colors.grey)
                     ),
                     onChanged: (value) {},
                     controller: textController,
