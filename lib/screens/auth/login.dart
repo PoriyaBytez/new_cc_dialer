@@ -25,6 +25,8 @@ class _LoginPageState extends State<LoginPage> {
   bool _autoValidateAuth = false;
   String? _cCode;
   String? _cName;
+  String? flag;
+
   final _formKey = GlobalKey<FormState>();
   String? _number;
   Country? _residence;
@@ -215,6 +217,7 @@ class _LoginPageState extends State<LoginPage> {
                                 _residence = country;
                                 _cCode = country.phoneCode; //dialingCode
                                 _cName = country.name;
+                                flag = country.flagEmoji;
                               });
                             },
                           );
@@ -234,7 +237,7 @@ class _LoginPageState extends State<LoginPage> {
                               ]),
                           child: Center(
                             child: Text((_residence != null)
-                                ? " +$_cCode  $_cName"
+                                ? " $flag +$_cCode  $_cName"
                                 : "Select Country",style: TextStyle(fontSize: 16,fontWeight: FontWeight.w300)),
                           ),
                         ),

@@ -3,12 +3,8 @@ import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:liquid_progress_indicator/liquid_progress_indicator.dart';
 import '../../../utils/bottonNavBar.dart';
 import '../../../utils/settings.dart';
-import '../app_module.dart';
 import '../contact/view_page.dart';
-import '../home/home_bloc.dart';
-import '../shared/repository/contact_repository.dart';
 import 'package:flutter/material.dart';
-import 'home_module.dart';
 
 class HomePage extends StatefulWidget {
   static String tag = 'home-page';
@@ -34,8 +30,7 @@ class _HomePageState extends State<HomePage> {
   bool isloading = false;
   final TextEditingController _cSearch = TextEditingController();
 
-  // List<Contact>? contacts = [];
-  List<Contact> contactsFiltered = [];
+  List<Contact> searchContacts = [];
   Offset? _tapPosition;
 
   // Contact? c;
@@ -129,9 +124,9 @@ class _HomePageState extends State<HomePage> {
                         );
                       }
                     });
-                    getAllContacts();
                   },
                 ),
+
                 IconButton(
                     icon: const Icon(
                       Icons.refresh,
@@ -145,18 +140,109 @@ class _HomePageState extends State<HomePage> {
             )),
         body: isloading
             ? Center(
+            child: SizedBox(
+              width: 200,
+              height: 50,
+              child: LiquidLinearProgressIndicator(
+                value: 0.65,
+                valueColor: const AlwaysStoppedAnimation(Color(0xffdcdcdc)),
+                backgroundColor: Colors.white,
+                borderColor: Colors.black,
+                borderRadius: 15,
+                borderWidth: 1.0,
+                direction: Axis.horizontal,
+                center: const Text("Loading..."),
+              ),
+            ))
+            : contacts!.isEmpty
+            ? Center(child: Text("No Data Found"))
+            : CupertinoScrollbar(
+          thickness: 6,
+          thicknessWhileDragging: 9,
+          child: searchContacts.length != 0 ||
+              _cSearch.text.isNotEmpty
+              ? ListView.builder(
+            itemCount: searchContacts.length,
+            itemBuilder: (BuildContext context, index) {
+              Contact? c = searchContacts.elementAt(index);
+              return GestureDetector(
+                onTapDown: _onTapDown,
+                onLongPress: () {
+                  showMenu(
+                    context: context,
+                    items: [
+                      PopupMenuItem(
+                        child: TextButton(
+                          child:
+                          Column(children: const <Widget>[
+                            Icon(Icons.phone),
+                            Text(
+                              "Call",
+                              style: TextStyle(fontSize: 16),
+                            ),
+                          ]),
+                          onPressed: () {
+                            // bloc.setContact(item);
+                            String? phoneNumber =
+                            (c.phones.length != 0)
+                                ? c.phones
+                                .elementAt(0)
+                                .number
+                                : '  ';
+                            if (!mounted) return;
+                            dest = phoneNumber
+                                .replaceAll(' ', '')
+                                .replaceAll('+', '00')
+                                .toString();
+
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      BottomNavBar(),
+                                ));
+                          },
+                        ),
+                      ),
+                    ],
+                    position: RelativeRect.fromRect(
+                      _tapPosition! & const Size(40, 40),
+                      // smaller rect, the touch area
+                      // Offset.zero & overlay!.size, // Bigger rect, the entire screen
+                      Rect.zero,
+                    ),
+                  );
+                },
                 child: SizedBox(
-                width: 200,
-                height: 50,
-                child: LiquidLinearProgressIndicator(
-                  value: 0.65,
-                  valueColor: const AlwaysStoppedAnimation(Color(0xffdcdcdc)),
-                  backgroundColor: Colors.white,
-                  borderColor: Colors.black,
-                  borderRadius: 15,
-                  borderWidth: 1.0,
-                  direction: Axis.horizontal,
-                  center: const Text("Loading..."),
+                  width: MediaQuery.of(context).size.width,
+                  child: ListTile(
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 20.0),
+                    leading: CircleAvatar(
+                      child: Text(
+                        "${c.displayName.substring(0, 1).toUpperCase()}",
+                        style: const TextStyle(
+                            fontSize: 26,
+                            color: Colors.white60),
+                      ),
+                    ),
+                    title: Text(
+                      "${c.displayName}",
+                      style: const TextStyle(fontSize: 17),
+                    ),
+                    subtitle: (c.phones.length != 0)
+                        ? Text(
+                      "${c.phones.elementAt(0).number}",
+                    )
+                        : null,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => ViewPage(c)),
+                      );
+                    },
+                  ),
                 ),
               ))
             : contacts!.isEmpty
@@ -346,7 +432,7 @@ class _HomePageState extends State<HomePage> {
                                   ),
                                 ),
                               );
-                            },
+                           },
                           ),
                   ));
   }
@@ -361,6 +447,20 @@ class _HomePageState extends State<HomePage> {
     contacts?.forEach((userDetail) {
       if (userDetail.displayName.toLowerCase().contains(text.toLowerCase()) || userDetail.displayName.toUpperCase().contains(text.toUpperCase()))
         searchContacts?.add(userDetail);
+    });
+
+    setState(() {});
+  }
+
+  onSearchTextChanged(String text) async {
+    searchContacts.clear();
+    if (text.isEmpty) {
+      setState(() {});
+      return;
+    }
+    contacts?.forEach((userDetail) {
+      if (userDetail.displayName.toLowerCase().contains(text.toLowerCase()) || userDetail.displayName.toUpperCase().contains(text.toUpperCase()))
+        searchContacts.add(userDetail);
     });
 
     setState(() {});

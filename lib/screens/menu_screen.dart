@@ -28,6 +28,7 @@ class _MenuScreenState extends State<MenuScreen> {
     return Scaffold(
       backgroundColor: appcolor.dialmainbackground,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text(
           'Menu',
           style: TextStyle(fontSize: 24, color: Colors.white),
@@ -74,11 +75,14 @@ class _MenuScreenState extends State<MenuScreen> {
               _preferences = await SharedPreferences.getInstance();
               String? countryCode = _preferences!.getString('countryCode');
               String? cellNumber = _preferences!.getString('countryCellNumber');
-              var whatsAppUrlAndroid = "whatsapp://send?phone=$supportWhatsappNumber""&text=${Uri.encodeComponent("My Account Number is: $sipUsername. My Name is: $accountUsername. My Cell Number is: +$countryCode$cellNumber  . Find my message below :")}";
-               var whatsAppUralIos="https://wa.me/$supportWhatsappNumber?text=${Uri.encodeComponent("My Account Number is: $sipUsername. My Name is: $accountUsername. My Cell Number is: +$countryCode$cellNumber  . Find my message below :")}";
-              if(Platform.isIOS) {
+              var whatsAppUrlAndroid =
+                  "whatsapp://send?phone=$supportWhatsappNumber"
+                  "&text=${Uri.encodeComponent("My Account Number is: $sipUsername. My Name is: $accountUsername. My Cell Number is: +$countryCode$cellNumber  . Find my message below :")}";
+              var whatsAppUralIos =
+                  "https://wa.me/$supportWhatsappNumber?text=${Uri.encodeComponent("My Account Number is: $sipUsername. My Name is: $accountUsername. My Cell Number is: +$countryCode$cellNumber  . Find my message below :")}";
+              if (Platform.isIOS) {
                 launchUrlString(whatsAppUralIos);
-              }else{
+              } else {
                 launchUrlString(whatsAppUrlAndroid);
               }
             },
@@ -117,7 +121,6 @@ class _MenuScreenState extends State<MenuScreen> {
             leading: const Icon(Icons.flag, color: Colors.blue),
             title: const Text("Privacy Policy", style: TextStyle(fontSize: 17)),
             onTap: () {
-              // BuildContext context;
               Navigator.pushNamed(context, '/TsCs');
             },
           ),
@@ -146,7 +149,7 @@ class _MenuScreenState extends State<MenuScreen> {
                   Align(
                     alignment: FractionalOffset.bottomCenter,
                     child: ListTile(
-                      leading: const Icon(FontAwesomeIcons.signOutAlt,
+                      leading: const Icon(FontAwesomeIcons.rightFromBracket,
                           color: Colors.red),
                       title:
                           const Text("Log Out", style: TextStyle(fontSize: 17)),
@@ -155,10 +158,31 @@ class _MenuScreenState extends State<MenuScreen> {
                           context: context,
                           builder: (BuildContext context) {
                             return AlertDialog(
-                              title: const Text("Exit!"),
-                              content: const Text(
-                                  "Do you really want to close this application !"),
                               actions: <Widget>[
+                                Center(
+                                    child: CircleAvatar(
+                                        radius: 80,
+                                        backgroundColor: Colors.transparent,
+                                        child: Icon(
+                                          size: 100,
+                                          Icons.error_outline_outlined,
+                                          color: Colors.orangeAccent,
+                                        ))),
+                                Center(
+                                    child: Text("Exit!",
+                                        style: TextStyle(
+                                            fontSize: 22,
+                                            fontWeight: FontWeight.bold))),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                Center(
+                                    child: Text(
+                                        "Do you really want to close \n this application !",
+                                        style: TextStyle(fontSize: 18))),
+                                SizedBox(
+                                  height: 15,
+                                ),
                                 Row(
                                   children: [
                                     const SizedBox(
@@ -170,9 +194,11 @@ class _MenuScreenState extends State<MenuScreen> {
                                       },
                                       child: Container(
                                         alignment: Alignment.center,
-                                        height: 30,
+                                        height: 40,
                                         width: 80,
                                         decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(10),
                                           gradient: LinearGradient(
                                             begin: Alignment.centerLeft,
                                             end: Alignment.centerRight,
@@ -199,9 +225,11 @@ class _MenuScreenState extends State<MenuScreen> {
                                       },
                                       child: Container(
                                         alignment: Alignment.center,
-                                        height: 30,
+                                        height: 40,
                                         width: 80,
                                         decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(10),
                                           gradient: LinearGradient(
                                             begin: Alignment.centerLeft,
                                             end: Alignment.centerRight,
@@ -235,7 +263,8 @@ _launchEmailer(String email, String mailSubject, String mailBody) async {
   String url =
       Uri.encodeFull("mailto:$email?subject=$mailSubject&body=$mailBody");
   if (await launchUrlString(url)) {
-    await launchUrlString(url);;
+    await launchUrlString(url);
+    ;
   } else {
     launch(supportWebsiteURL, forceWebView: true, forceSafariVC: false);
     throw 'Could not launch $url';

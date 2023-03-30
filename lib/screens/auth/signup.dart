@@ -26,6 +26,7 @@ class _SignUpPageState extends State<SignUpPage> {
   Country? _residence;
   String _cCode = '1';
   String? _cName;
+  String? flag;
   String? _number;
   String? _fullname;
   String? _email;
@@ -294,6 +295,7 @@ class _SignUpPageState extends State<SignUpPage> {
                               _residence = country;
                               _cCode = country.phoneCode; //dialingCode
                               _cName = country.name;
+                              flag = country.flagEmoji;
                             });
                           },
                         );
@@ -312,7 +314,7 @@ class _SignUpPageState extends State<SignUpPage> {
                             ]),
                         child: Center(
                           child: Text((_residence != null)
-                              ? "+${_cCode}  ${_cName}"
+                              ? " $flag +$_cCode  $_cName"
                               : "Select Country",style: TextStyle(fontSize: 16,fontWeight: FontWeight.w300)),
                         ),
                       ),

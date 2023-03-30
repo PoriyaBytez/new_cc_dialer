@@ -30,7 +30,6 @@ class BottomNavBar extends StatefulWidget {
 }
 
 class _BottomNavBarState extends State<BottomNavBar> {
-  bool? _allowBackButton;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   var listener;
@@ -40,29 +39,13 @@ class _BottomNavBarState extends State<BottomNavBar> {
   final ContactsModule _contacts = ContactsModule();
   final Access _contactsMissing = Access();
   final PayPal _paypal = PayPal();
- static final DialPadWidget _dialPadWidget = DialPadWidget(helper);
-   int pageIndex = 1;
+  static final DialPadWidget _dialPadWidget = DialPadWidget(helper);
+  int pageIndex = 1;
+
   @override
   void initState() {
     super.initState();
-    initPlatformState();
     askPermission();
-    getAllContacts();
-  }
-
-
-  //############################################################################################################
-  Future<void> initPlatformState() async {
-    String platformVersion;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    // try {
-    //   platformVersion = await FlutterOpenWhatsapp.platformVersion;
-    // } on PlatformException {
-    //   platformVersion = 'Failed to get platform version.';
-    // }
-    if (!mounted) return;
-    if (!mounted) return;
-    setState(() {});
   }
 
 //############################################################################################################
@@ -100,28 +83,25 @@ class _BottomNavBarState extends State<BottomNavBar> {
     ;
   }
 
-  Future<bool> askPermission() async{
+  Future<bool> askPermission() async {
     FlutterContacts.config.includeNotesOnIos13AndAbove = false;
     PermissionStatus status = await Permission.contacts.request();
-    if(status.isDenied == true)
-    {
+    if (status.isDenied == true) {
       askPermission();
       setState(() {
         isCheck = false;
       });
       return false;
-    }
-    else
-    {
+    } else {
       setState(() {
         isCheck = true;
       });
+      getAllContacts();
       return true;
     }
   }
 
   bool isCheck = false;
-
 
 //############################################################################################################
   checkContactPermission() async {
@@ -178,50 +158,76 @@ class _BottomNavBarState extends State<BottomNavBar> {
   }
 
   Future<bool> myDialog() async {
-    Alert(
-      context: _scaffoldKey.currentContext!,
-      type: AlertType.warning,
-      title: "CONFIRMATION REQUIRED !",
-      desc: "Do you really want to close this application !",
-      buttons: [
-        DialogButton(
-          onPressed: () {
-            if (!mounted) return;
-            setState(() {
-              _allowBackButton = false;
-            });
-            Navigator.of(context, rootNavigator: true).pop();
+    return await showDialog(
+          //show confirm dialogue
+          //the return value will be from "Yes" or "No" options
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              actions: [
+                Center(
+                    child: CircleAvatar(
+                        radius: 80,
+                        backgroundColor: Colors.transparent,
+                        child: Icon(
+                          size: 100,
+                          Icons.error_outline_outlined,
+                          color: Colors.orangeAccent,
+                        ))),
+                Center(
+                    child: Text(
+                  "CONFIRMATION",
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.w400),
+                )),
+                Center(
+                    child: Text(
+                  "REQUIRED !",
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.w400),
+                )),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
+                  child: Text("Do you really want to close this application !",
+                      style: TextStyle(fontSize: 16)),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Expanded(
+                      child: DialogButton(
+                        onPressed: () {
+                          Navigator.of(context).pop(false);
+                        },
+                        gradient: LinearGradient(
+                          colors: brandColors3,
+                        ),
+                        child: const Text(
+                          "NO",
+                          style: TextStyle(color: Colors.white, fontSize: 20),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: DialogButton(
+                        onPressed: () {
+                          Navigator.of(context).pop(true);
+                        },
+                        gradient: LinearGradient(
+                          colors: brandColors3,
+                        ),
+                        child: const Text(
+                          "YES",
+                          style: TextStyle(color: Colors.white, fontSize: 20),
+                        ),
+                      ),
+                    )
+                  ],
+                )
+              ],
+            );
           },
-          gradient: LinearGradient(
-            colors: brandColors3,
-          ),
-          child: const Text(
-            "NO",
-            style: TextStyle(color: Colors.white, fontSize: 20),
-          ),
-        ),
-        DialogButton(
-          onPressed: () {
-            if (!mounted) return;
-            setState(() {
-              _allowBackButton = true;
-            });
-            SystemNavigator.pop();
-          },
-          gradient: LinearGradient(
-            colors: brandColors3,
-          ),
-          child: const Text(
-            "YES",
-            style: TextStyle(color: Colors.white, fontSize: 20),
-          ),
-        )
-      ],
-    ).show();
-    _allowBackButton! ? _allowBackButton = true : _allowBackButton = false;
-    return Future.value(_allowBackButton);
+        ) ??
+        false; //if showDialouge had returned null, then return false
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -238,11 +244,11 @@ class _BottomNavBarState extends State<BottomNavBar> {
         child: Scaffold(
           backgroundColor: appcolor.dialmainbackground,
           key: _scaffoldKey,
-          body: _children[pageIndex],//_children(pageIndex),
+          body: _children[pageIndex], //_children(pageIndex),
           bottomNavigationBar: SizedBox(
             height: 60,
             child: Padding(
-              padding: const EdgeInsets.only(left: 10, right: 10),
+              padding: const EdgeInsets.only(left: 10, right: 10, bottom: 10),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [

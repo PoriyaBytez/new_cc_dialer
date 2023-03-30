@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:proximity_screen_lock/proximity_screen_lock.dart';
 import 'package:sip_ua/sip_ua.dart';
 import '../../callscreen_loader.dart';
@@ -43,7 +42,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
   String _timeLabel = '';
   Timer? _timer;
   bool _videoMuted = false;
-  Call? pcal;
+  Call? pcall;
 
   @override
   void callStateChanged(Call call, CallState callState) {
@@ -74,7 +73,9 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
     }
 
     switch (callState.state) {
-
+      case CallStateEnum.STREAM:
+        _handelStreams(callState);
+        break;
       case CallStateEnum.ENDED:
       case CallStateEnum.FAILED:
         _backToDialPad();
@@ -90,14 +91,11 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
       case CallStateEnum.NONE:
 
       case CallStateEnum.CALL_INITIATION:
-      case CallStateEnum.STREAM:
-        _handelStreams(callState);
-        break;
       case CallStateEnum.REFER:
         break;
     }
     setState(() {
-      pcal = call;
+      pcall = call;
     });
   }
 
@@ -128,9 +126,9 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
       (_localStream == null || _localStream!.getVideoTracks().isEmpty) &&
       (_remoteStream == null || _remoteStream!.getVideoTracks().isEmpty);
 
-  String? get remote_identity => pcal?.remote_identity;
+  String? get remote_identity => pcall?.remote_identity;
 
-  String? get direction => pcal?.direction;
+  String? get direction => pcall?.direction;
 
   void _startTimer() {
     _timer = Timer.periodic(const Duration(seconds: 1), (Timer timer) {
@@ -167,7 +165,17 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
     }
   }
 
+  void _cleanUp() {
+    if (_localStream == null) return;
+    _localStream?.getTracks().forEach((track) {
+      track.stop();
+    });
+    _localStream!.dispose();
+    _localStream = null;
+  }
+
   void _backToDialPad() {
+    _timer?.cancel();
     if (direction == 'INCOMING') {
       InCallService().stopRingTone();
     } else {
@@ -177,6 +185,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
     Timer(const Duration(seconds: 2), () {
       Navigator.of(context).pop();
     });
+    _cleanUp();
   }
 
   void _handelStreams(CallState event) async {
@@ -186,7 +195,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
         _localRenderer!.srcObject = stream;
       }
       if (!kIsWeb && !WebRTC.platformIsDesktop) {
-        event.stream?.getAudioTracks().first.enableSpeakerphone(false);
+        stream?.getAudioTracks().first.enableSpeakerphone(false);
       }
       _localStream = stream;
     }
@@ -214,36 +223,23 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
         : MediaQuery.of(context).size.height;
   }
 
+
   void _handleHangup() {
     InCallService().stopRingTone();
-    pcal!.hangup();
+    pcall!.hangup({'status_code': 603});
     ProximityScreenLock.setActive(false);
     _timer?.cancel();
   }
 
   void _handleAccept() async {
-    bool remoteHasVideo = pcal!.remote_has_audio;
-    final mediaConstraints = <String, dynamic>{
-      'audio': true,
-      'video': remoteHasVideo
-    };
-    MediaStream mediaStream;
+    bool remoteHasVideo = pcall!.remote_has_audio;
+    pcall!.answer(helper!.buildCallOptions(!remoteHasVideo));
 
-    if (kIsWeb && remoteHasVideo) {
+    InCallService().stopRingTone();
+    if (_timerStarted == false) {
       _startTimer();
       _timerStarted = true;
-      mediaStream =
-          await navigator.mediaDevices.getDisplayMedia(mediaConstraints);
-      mediaConstraints['video'] = false;
-      MediaStream userStream =
-          await navigator.mediaDevices.getUserMedia(mediaConstraints);
-      mediaStream.addTrack(userStream.getAudioTracks()[0], addToNative: true);
-    } else {
-      mediaConstraints['video'] = remoteHasVideo;
-      mediaStream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
     }
-    pcal!.answer(helper!.buildCallOptions(!remoteHasVideo),
-        mediaStream: mediaStream);
   }
 
   void _switchCamera() {
@@ -253,32 +249,70 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
   }
 
   void _muteAudio() {
-    print("==== _muteAudio ====");
     if (_audioMuted) {
-      pcal!.unmute(true, false);
+      pcall!.unmute(true, false);
     } else {
-      pcal!.mute(true, false);
+      pcall!.mute(true, false);
     }
   }
 
   void _muteVideo() {
     if (_videoMuted) {
-      pcal!.unmute(false, true);
+      pcall!.unmute(false, true);
     } else {
-      pcal!.mute(false, true);
+      pcall!.mute(false, true);
     }
   }
 
   void _handleHold() {
     if (_hold) {
-      pcal!.unhold();
+      pcall!.unhold();
     } else {
-      pcal!.hold();
+      pcall!.hold();
     }
   }
 
+  late String _transferTarget;
+  void _handleTransfer() {
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Enter target to transfer.'),
+          content: TextField(
+            onChanged: (String text) {
+              setState(() {
+                _transferTarget = text;
+              });
+            },
+            decoration: InputDecoration(
+              hintText: 'URI or Username',
+            ),
+            textAlign: TextAlign.center,
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Ok'),
+              onPressed: () {
+                pcall!.refer(_transferTarget);
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void _handleDtmf(String tone) {
-    pcal!.sendDTMF(tone);
+    pcall!.sendDTMF(tone);
   }
 
   void _handleKeyPad() {
@@ -287,22 +321,17 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
     });
   }
 
-  _toggleSpeaker() {
+  Future<void> _toggleSpeaker() async {
+      print("_toggleSpeaker is called");
       setState(() {
         _speakerOn = !_speakerOn;
       });
-      print("speaker ==> $_speakerOn");
-        if (_localStream?.getAudioTracks().isNotEmpty ?? false) {
-          _localStream
-              ?.getAudioTracks()
-              .first
-              .enableSpeakerphone(_speakerOn);
-      }
-      // _localStream?.getAudioTracks().first.enableSpeakerphone(_speakerOn);
-      InCallService().proximity(_speakerOn);
+      Helper.setSpeakerphoneOn(!_speakerOn);
+      InCallService().proximity(!_speakerOn);
   }
 
   //#########################################################################################################################################
+
   String flattenPhoneNumber(String phoneStr) {
     phoneStr = phoneStr.toString().replaceFirst("00", "");
     phoneStr = phoneStr.toString().replaceFirst("+", "");
@@ -329,30 +358,31 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
     String? numTest2;
     String? result;
 
-    if (contacts!.isNotEmpty) {
-      for (var i = 0; i < contacts!.length; i++) {
-        if (contacts![i].phones.isNotEmpty) {
-          if (contacts![i].phones.elementAt(0).number.isNotEmpty) {
-            numTest1 = contacts![i].phones.elementAt(0).number;
+    if (contacts.isNotEmpty) {
+      for (var i = 0; i < contacts.length; i++) {
+        if (contacts[i].phones.isNotEmpty) {
+          if (contacts[i].phones.elementAt(0).number.isNotEmpty) {
+            numTest1 = contacts[i].phones.elementAt(0).number;
             phnFlattened = flattenContactNumber(numTest1);
-          }
-          /*else if (contacts![i].phones.length > 1) {
-            numTest2 = contacts![i].phones.elementAt(1).number;
+          } else if (contacts[i].phones.length > 1) {
+            numTest2 = contacts[i].phones.elementAt(1).number;
             phnFlattened = flattenContactNumber(numTest2);
-          }*/
+          }
 
           if (phnFlattened!.contains(searchTermFlatten)) {
-            result = contacts![i].displayName;
+            if(i!=0) {
+              result = contacts[i].displayName;
+            }
             numFound = true;
             break;
           }
         }
       }
     }
-    if (numFound) {
-      return result;
+    if (result == null) {
+        return 'UNKNOWN';
     } else {
-      return 'UNKNOWN';
+      return result;
     }
   }
 
@@ -440,22 +470,22 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
           basicActions.add(hangupBtn);
         } else {
           basicActions.add(hangupBtn);
-          // if (voiceonly) {
+          if (voiceonly) {
             advanceActions.add(ActionButton(
               title: _speakerOn ? 'speaker' : 'speaker',
               icon: _speakerOn ? Icons.volume_up : Icons.volume_off,
               checked: _speakerOn,
               onPressed: () => _toggleSpeaker(),
             ));
-          // }
-          // else {
-          //   advanceActions.add(ActionButton(
-          //     title: _videoMuted ? "camera on" : 'camera off',
-          //     icon: _videoMuted ? Icons.videocam : Icons.videocam_off,
-          //     checked: _videoMuted,
-          //     onPressed: () => _muteVideo(),
-          //   ));
-          // }
+          }
+          else {
+            advanceActions.add(ActionButton(
+              title: _videoMuted ? "camera on" : 'camera off',
+              icon: _videoMuted ? Icons.videocam : Icons.videocam_off,
+              checked: _videoMuted,
+              onPressed: () => _muteVideo(),
+            ));
+          }
         }
         break;
       case CallStateEnum.ACCEPTED:
@@ -469,7 +499,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
             setState(() {
               _speakerOn = true;
               _toggledOnce = true;
-              // _toggleSpeaker();
+              _toggleSpeaker();
             });
           }
         } else {
@@ -487,20 +517,20 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
             onPressed: () => _muteAudio(),
           ));
 
-          // if (voiceonly) {
+          if (voiceonly) {
             advanceActions.add(ActionButton(
               title: "keypad",
               icon: Icons.dialpad,
               onPressed: () => _handleKeyPad(),
             ));
-          // }
-          // else {
-          //   advanceActions.add(ActionButton(
-          //     title: "switch camera",
-          //     icon: Icons.switch_video,
-          //     onPressed: () => _switchCamera(),
-          //   ));
-          // }
+          }
+          else {
+            advanceActions.add(ActionButton(
+              title: "switch camera",
+              icon: Icons.switch_video,
+              onPressed: () => _switchCamera(),
+            ));
+          }
 
           advanceActions.add(ActionButton(
             title: _speakerOn ? 'speaker' : 'speaker',
@@ -525,16 +555,16 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
               onPressed: () => _handleKeyPad(),
             ));
           } else {
-            basicActions.add(const ActionButton(
+            basicActions.add( ActionButton(
               title: "transfer",
               icon: Icons.phone_forwarded,
               fillColor: Colors.grey,
+              onPressed: () => _handleTransfer(),
             ));
           }
         }
         break;
       case CallStateEnum.FAILED:
-
       case CallStateEnum.ENDED:
         basicActions.add(hangupBtnInactive);
         break;
@@ -545,7 +575,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
             setState(() {
               _speakerOn = true;
               _toggledOnce = true;
-              // _toggleSpeaker();
+              _toggleSpeaker();
             });
           }
         } else {
@@ -560,20 +590,20 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
           checked: _audioMuted,
           onPressed: () => _muteAudio(),
         ));
-        // if (voiceonly) {
+        if (voiceonly) {
           advanceActions.add(ActionButton(
             title: "keypad",
             icon: Icons.dialpad,
             onPressed: () => _handleKeyPad(),
           ));
-        // }
-        // else {
-        //   advanceActions.add(ActionButton(
-        //     title: "switch camera",
-        //     icon: Icons.switch_video,
-        //     onPressed: () => _switchCamera(),
-        //   ));
-        // }
+        }
+        else {
+          advanceActions.add(ActionButton(
+            title: "switch camera",
+            icon: Icons.switch_video,
+            onPressed: () => _switchCamera(),
+          ));
+        }
 
         advanceActions.add(ActionButton(
           title: _speakerOn ? 'speaker' : 'speaker',
@@ -607,6 +637,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
         }
         break;
       default:
+        print('Other state => $_state');
         break;
     }
 
@@ -749,6 +780,11 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
     //
   }
 
+  @override
+  void dispose() {
+    _localStream?.dispose();
+    super.dispose();
+  }
   @override
   void onNewNotify(Notify ntf) {
     //
