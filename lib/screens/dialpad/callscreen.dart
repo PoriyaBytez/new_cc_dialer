@@ -168,7 +168,6 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
   void _cleanUp() {
     if (_localStream == null) return;
     _localStream?.getTracks().forEach((track) {
-      print("track ==> $track");
       track.stop();
     });
     _localStream!.dispose();
@@ -196,7 +195,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
         _localRenderer!.srcObject = stream;
       }
       if (!kIsWeb && !WebRTC.platformIsDesktop) {
-        event.stream?.getAudioTracks().first.enableSpeakerphone(false);
+        stream?.getAudioTracks().first.enableSpeakerphone(false);
       }
       _localStream = stream;
     }
@@ -241,28 +240,6 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
       _startTimer();
       _timerStarted = true;
     }
-
-      // final mediaConstraints = <String, dynamic>{
-    //   'audio': true,
-    //   'video': remoteHasVideo
-    // };
-    // MediaStream mediaStream;
-    //
-    // if (kIsWeb && remoteHasVideo) {
-    //   _startTimer();
-    //   _timerStarted = true;
-    //   mediaStream =
-    //       await navigator.mediaDevices.getDisplayMedia(mediaConstraints);
-    //   mediaConstraints['video'] = false;
-    //   MediaStream userStream =
-    //       await navigator.mediaDevices.getUserMedia(mediaConstraints);
-    //   mediaStream.addTrack(userStream.getAudioTracks()[0], addToNative: true);
-    // } else {
-    //   mediaConstraints['video'] = remoteHasVideo;
-    //   mediaStream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
-    // }
-    // pcall!.answer(helper!.buildCallOptions(!remoteHasVideo),
-    //     mediaStream: mediaStream);
   }
 
   void _switchCamera() {
@@ -272,7 +249,6 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
   }
 
   void _muteAudio() {
-    print("==== _muteAudio ====");
     if (_audioMuted) {
       pcall!.unmute(true, false);
     } else {
@@ -350,8 +326,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
       setState(() {
         _speakerOn = !_speakerOn;
       });
-      // await FlutterCallkeep.setSpeakerphoneOn(_speakerOn);
-      _localStream!.getAudioTracks()[0].enableSpeakerphone(!_speakerOn);
+      Helper.setSpeakerphoneOn(!_speakerOn);
       InCallService().proximity(!_speakerOn);
   }
 
@@ -590,7 +565,6 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
         }
         break;
       case CallStateEnum.FAILED:
-
       case CallStateEnum.ENDED:
         basicActions.add(hangupBtnInactive);
         break;
@@ -601,7 +575,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
             setState(() {
               _speakerOn = true;
               _toggledOnce = true;
-              // _toggleSpeaker();
+              _toggleSpeaker();
             });
           }
         } else {
@@ -806,6 +780,11 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
     //
   }
 
+  @override
+  void dispose() {
+    _localStream?.dispose();
+    super.dispose();
+  }
   @override
   void onNewNotify(Notify ntf) {
     //

@@ -176,7 +176,7 @@ class _MyDialPadWidget extends State<DialPadWidget>
         mediaStream.addTrack(userStream.getAudioTracks()[0], addToNative: true);
       }
 
-      dest = textController.text; //replaceFirst('00', '')
+      dest = textController.text;
       _lastDialed = textController.text;
       _preferences!.setString('dest', dest!);
       helper!.call(dest!.replaceFirst('00', ''),

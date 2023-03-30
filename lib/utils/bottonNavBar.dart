@@ -39,14 +39,14 @@ class _BottomNavBarState extends State<BottomNavBar> {
   final ContactsModule _contacts = ContactsModule();
   final Access _contactsMissing = Access();
   final PayPal _paypal = PayPal();
- static final DialPadWidget _dialPadWidget = DialPadWidget(helper);
-   int pageIndex = 1;
+  static final DialPadWidget _dialPadWidget = DialPadWidget(helper);
+  int pageIndex = 1;
+
   @override
   void initState() {
     super.initState();
     askPermission();
   }
-
 
 //############################################################################################################
 
@@ -83,19 +83,16 @@ class _BottomNavBarState extends State<BottomNavBar> {
     ;
   }
 
-  Future<bool> askPermission() async{
+  Future<bool> askPermission() async {
     FlutterContacts.config.includeNotesOnIos13AndAbove = false;
     PermissionStatus status = await Permission.contacts.request();
-    if(status.isDenied == true)
-    {
+    if (status.isDenied == true) {
       askPermission();
       setState(() {
         isCheck = false;
       });
       return false;
-    }
-    else
-    {
+    } else {
       setState(() {
         isCheck = true;
       });
@@ -105,7 +102,6 @@ class _BottomNavBarState extends State<BottomNavBar> {
   }
 
   bool isCheck = false;
-
 
 //############################################################################################################
   checkContactPermission() async {
@@ -161,92 +157,77 @@ class _BottomNavBarState extends State<BottomNavBar> {
     return Future.value(val);
   }
 
-
-
-
   Future<bool> myDialog() async {
-    return await showDialog( //show confirm dialogue
-      //the return value will be from "Yes" or "No" options
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text( "CONFIRMATION REQUIRED !"),
-        content: Text("Do you really want to close this application !"),
-        actions:[
-          Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-            Expanded(
-              child: DialogButton(
-                onPressed: () {
-                  Navigator.of(context).pop(false);
-                },
-                gradient: LinearGradient(
-                  colors: brandColors3,
+    return await showDialog(
+          //show confirm dialogue
+          //the return value will be from "Yes" or "No" options
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              actions: [
+                Center(
+                    child: CircleAvatar(
+                        radius: 80,
+                        backgroundColor: Colors.transparent,
+                        child: Icon(
+                          size: 100,
+                          Icons.error_outline_outlined,
+                          color: Colors.orangeAccent,
+                        ))),
+                Center(
+                    child: Text(
+                  "CONFIRMATION",
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.w400),
+                )),
+                Center(
+                    child: Text(
+                  "REQUIRED !",
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.w400),
+                )),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
+                  child: Text("Do you really want to close this application !",
+                      style: TextStyle(fontSize: 16)),
                 ),
-                child: const Text(
-                  "NO",
-                  style: TextStyle(color: Colors.white, fontSize: 20),
-                ),
-              ),
-            ),
-
-            Expanded(
-              child: DialogButton(
-                onPressed: () {
-                  Navigator.of(context).pop(true);
-                },
-                gradient: LinearGradient(
-                  colors: brandColors3,
-                ),
-                child: const Text(
-                  "YES",
-                  style: TextStyle(color: Colors.white, fontSize: 20),
-                ),
-              ),
-            )
-          ],)
-
-
-        ],
-      ),
-    )??false; //if showDialouge had returned null, then return false
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Expanded(
+                      child: DialogButton(
+                        onPressed: () {
+                          Navigator.of(context).pop(false);
+                        },
+                        gradient: LinearGradient(
+                          colors: brandColors3,
+                        ),
+                        child: const Text(
+                          "NO",
+                          style: TextStyle(color: Colors.white, fontSize: 20),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: DialogButton(
+                        onPressed: () {
+                          Navigator.of(context).pop(true);
+                        },
+                        gradient: LinearGradient(
+                          colors: brandColors3,
+                        ),
+                        child: const Text(
+                          "YES",
+                          style: TextStyle(color: Colors.white, fontSize: 20),
+                        ),
+                      ),
+                    )
+                  ],
+                )
+              ],
+            );
+          },
+        ) ??
+        false; //if showDialouge had returned null, then return false
   }
-
-  // Future<bool> myDialog() async {
-  //   Alert(
-  //     context: _scaffoldKey.currentContext!,
-  //     type: AlertType.warning,
-  //     title: "CONFIRMATION REQUIRED !",
-  //     desc: "Do you really want to close this application !",
-  //     buttons: [
-  //       DialogButton(
-  //         onPressed: () {
-  //           Navigator.of(context).pop(false);
-  //         },
-  //         gradient: LinearGradient(
-  //           colors: brandColors3,
-  //         ),
-  //         child: const Text(
-  //           "NO",
-  //           style: TextStyle(color: Colors.white, fontSize: 20),
-  //         ),
-  //       ),
-  //       DialogButton(
-  //         onPressed: () {
-  //          Navigator.of(context).pop(true);
-  //         },
-  //         gradient: LinearGradient(
-  //           colors: brandColors3,
-  //         ),
-  //         child: const Text(
-  //           "YES",
-  //           style: TextStyle(color: Colors.white, fontSize: 20),
-  //         ),
-  //       )
-  //     ],
-  //   ).show();
-  //
-  // }
-
 
   @override
   Widget build(BuildContext context) {
@@ -263,11 +244,11 @@ class _BottomNavBarState extends State<BottomNavBar> {
         child: Scaffold(
           backgroundColor: appcolor.dialmainbackground,
           key: _scaffoldKey,
-          body: _children[pageIndex],//_children(pageIndex),
+          body: _children[pageIndex], //_children(pageIndex),
           bottomNavigationBar: SizedBox(
             height: 60,
             child: Padding(
-              padding: const EdgeInsets.only(left: 10, right: 10,bottom: 10),
+              padding: const EdgeInsets.only(left: 10, right: 10, bottom: 10),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
