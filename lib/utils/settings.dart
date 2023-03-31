@@ -97,6 +97,5 @@ class appcolor {
 getAllContacts() async {
   contacts = await FlutterContacts.getContacts(withPhoto: false, withProperties: true);
   FlutterContacts.config.includeNotesOnIos13AndAbove = true;
-  print("contacts bottom ${contacts!.length}");
-
+  print("contacts bottom ${contacts.length}");
 }
