@@ -58,7 +58,7 @@ class TsCsPage extends State<TsCs> {
           },
         ),
       )
-      ..loadRequest(Uri.parse(termsPolicyURL));
+      ..loadRequest(Uri.parse(supportWebsiteURL));//termsPolicyURL
   }
 
   @override

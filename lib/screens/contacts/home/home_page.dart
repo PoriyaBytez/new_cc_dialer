@@ -39,18 +39,8 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     // bloc = HomeModule.to.getBloc<HomeBloc>();
+    getAllContacts();
     super.initState();
-  }
-
-  filterContact() {
-    if (_cSearch.text.isNotEmpty) {
-      contacts!.retainWhere((element) {
-        String search = _cSearch.text.toLowerCase();
-        String ContactName = element.displayName.toLowerCase();
-        return ContactName.contains(search);
-      });
-      setState(() {});
-    }
   }
 
   void _onTapDown(TapDownDetails details) {
@@ -134,7 +124,9 @@ class _HomePageState extends State<HomePage> {
                       size: 30.0,
                     ),
                     onPressed: () {
-                      getAllContacts();
+                      setState(() {
+                        getAllContacts();
+                      });
                     })
               ],
             )),
@@ -271,13 +263,13 @@ class _HomePageState extends State<HomePage> {
                             // bloc.setContact(item);
                             String? phoneNumber =
                             (c.phones.length != 0)
-                                ? c?.phones
+                                ? c.phones
                                 .elementAt(0)
                                 .number
                                 : '  ';
                             if (!mounted) return;
                             dest = phoneNumber
-                                ?.replaceAll(' ', '')
+                                .replaceAll(' ', '')
                                 .replaceAll('+', '00')
                                 .toString();
 
@@ -306,29 +298,29 @@ class _HomePageState extends State<HomePage> {
                         horizontal: 20.0),
                     leading: CircleAvatar(
                       child: Text(
-                        "${c?.displayName.substring(0, 1).toUpperCase()}",
+                        "${c.displayName.substring(0, 1).toUpperCase()}",
                         style: const TextStyle(
                             fontSize: 26,
                             color: Colors.white60),
                       ),
                     ),
                     title: Text(
-                      "${c?.displayName}",
+                      "${c.displayName}",
                       style: const TextStyle(fontSize: 17),
                     ),
-                    subtitle: (c?.phones.length != 0)
+                    subtitle: (c.phones.length != 0)
                         ? Text(
-                      "${c?.phones.elementAt(0).number}",
+                      "${c.phones.elementAt(0).number}",
                     )
                         : null,
                     onTap: () {
                       // bloc.setContact(item);
-                      print('item ==> ${c?.displayName}');
+                      print('item ==> ${c.displayName}');
                       print('index ==> ${index}');
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => ViewPage(c!)),
+                            builder: (context) => ViewPage(c)),
                       );
                     },
                   ),
@@ -345,7 +337,7 @@ class _HomePageState extends State<HomePage> {
       setState(() {});
       return;
     }
-    contacts?.forEach((userDetail) {
+    contacts.forEach((userDetail) {
       if (userDetail.displayName.toLowerCase().contains(text.toLowerCase()) || userDetail.displayName.toUpperCase().contains(text.toUpperCase()))
         searchContacts.add(userDetail);
     });

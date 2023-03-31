@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter_countdown_timer/countdown_timer_controller.dart';
 import 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
 import 'package:flutter/material.dart';
+import 'package:otp_text_field/otp_field.dart';
+import 'package:otp_text_field/style.dart';
 import 'package:provider/provider.dart';
 import 'package:requests/requests.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
@@ -245,12 +247,12 @@ class _OtpPageState extends State<OtpPage> {
           "full_name": _name,
           "country_code": _ccode,
           "phone_number": _cellNum,
-          "email": _eemail
+          "email": _eemail,
+          "company_name": _compName
         },
         bodyEncoding: RequestBodyEncoding.JSON,
         timeoutSeconds: 3000);
-    print('sinup result success==> ${result.body} ');
-
+    print("response==> ${result.body}");
     if (result.success) {
 
       if ((json.decode(result.content()).containsKey("action"))) {
@@ -418,12 +420,26 @@ class _OtpPageState extends State<OtpPage> {
                             borderRadius: BorderRadius.circular(10)),
                         onChange: (code) {
                           Provider.of<AuthService>(context, listen: false);
-                          setState(() {
-                            t1.text = code;
-                          });
                           _onOtpCallBack(code, false);
                         },
                       ),
+                      // OTPTextField(
+                      //   length: otpCodeLength,
+                      //   width: MediaQuery.of(context).size.width,
+                      //   fieldWidth: 80,
+                      //   style: TextStyle(
+                      //       fontSize: 17
+                      //   ),
+                      //   textFieldAlignment: MainAxisAlignment.spaceAround,
+                      //   fieldStyle: FieldStyle.underline,
+                      //   onCompleted: (pin) {
+                      //     Provider.of<AuthService>(context, listen: false);
+                      //     // setState(() {
+                      //     //   t1.text = pin;
+                      //     // });
+                      //     _onOtpCallBack(pin, false);
+                      //   },
+                      // ),
                       const Spacer(),
                       Container(
                         height: 50,
