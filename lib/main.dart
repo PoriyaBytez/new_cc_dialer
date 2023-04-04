@@ -94,9 +94,9 @@ class MyMainApp extends StatelessWidget {
           if (snapshot.connectionState == ConnectionState.done) {
             return
               snapshot.hasData
-                ?
+                  ?
               BottomNavBar()
-            : const LoginPage();
+                  : const LoginPage();
           } else {
             return Container(color: Colors.white);
           }

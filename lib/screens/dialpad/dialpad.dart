@@ -169,10 +169,10 @@ class _MyDialPadWidget extends State<DialPadWidget>
 
       if (kIsWeb && !voiceonly) {
         mediaStream =
-            await navigator.mediaDevices.getDisplayMedia(mediaConstraints);
+        await navigator.mediaDevices.getDisplayMedia(mediaConstraints);
         mediaConstraints['video'] = false;
         MediaStream userStream =
-            await navigator.mediaDevices.getUserMedia(mediaConstraints);
+        await navigator.mediaDevices.getUserMedia(mediaConstraints);
         mediaStream.addTrack(userStream.getAudioTracks()[0], addToNative: true);
       }
 
@@ -331,17 +331,17 @@ class _MyDialPadWidget extends State<DialPadWidget>
 
     return lables
         .map((row) => Padding(
-            padding: const EdgeInsets.all(4),
-            child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: row
-                    .map((label) => ActionButton(
-                          title: label.keys.first,
-                          subTitle: label.values.first,
-                          onPressed: () => _handleNum(label.keys.first),
-                          number: true,
-                        ))
-                    .toList())))
+        padding: const EdgeInsets.all(4),
+        child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: row
+                .map((label) => ActionButton(
+              title: label.keys.first,
+              subTitle: label.values.first,
+              onPressed: () => _handleNum(label.keys.first),
+              number: true,
+            ))
+                .toList())))
         .toList();
   }
 
@@ -373,9 +373,9 @@ class _MyDialPadWidget extends State<DialPadWidget>
                     textAlign: TextAlign.center,
                     style: const TextStyle(fontSize: 34, color: Colors.black54),
                     decoration:  InputDecoration(
-                      border: InputBorder.none,
-                      hintText: text,
-                      hintStyle: TextStyle(color: Colors.grey)
+                        border: InputBorder.none,
+                        hintText: text,
+                        hintStyle: TextStyle(color: Colors.grey)
                     ),
                     onChanged: (value) {},
                     controller: textController,
@@ -405,10 +405,10 @@ class _MyDialPadWidget extends State<DialPadWidget>
               Expanded(
                 flex: 3,
                 child: ActionButton(
-                    icon: Icons.call,
-                    fillColor: Colors.green.shade400,
-                    onPressed: () =>_handleCall(context, true),
-                   ),
+                  icon: Icons.call,
+                  fillColor: Colors.green.shade400,
+                  onPressed: () => _handleCall(context, true),
+                ),
               ),
               Expanded(
                 flex: 1,
@@ -458,7 +458,7 @@ class _MyDialPadWidget extends State<DialPadWidget>
                         ),
                         child: Padding(
                           padding:
-                              const EdgeInsets.fromLTRB(10.0, 8.0, 10.0, 8.0),
+                          const EdgeInsets.fromLTRB(10.0, 8.0, 10.0, 8.0),
                           child: Text(
                             myTarrif,
                             textDirection: TextDirection.ltr,

@@ -63,7 +63,7 @@ class _SignUpPageState extends State<SignUpPage> {
       (const SnackBar(
           duration: Duration(seconds: 5),
           content:
-              Text('return "Mobile number must be more than 5 digits !"')));
+          Text('return "Mobile number must be more than 5 digits !"')));
       return null;
     } else if (value.length > 14) {
       _autoValidateAuth1 = false;
@@ -163,7 +163,7 @@ class _SignUpPageState extends State<SignUpPage> {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           duration: Duration(seconds: 5),
           content:
-              Text('Full Name Must contain First Name and Last Name ONLY.')));
+          Text('Full Name Must contain First Name and Last Name ONLY.')));
       return null;
     } else {
       _autoValidateAuth3 = true;
@@ -254,9 +254,9 @@ class _SignUpPageState extends State<SignUpPage> {
                           final form = _formKey.currentState;
                           form!.save();
                           if (form.validate() &
-                              (_autoValidateAuth1 == true) &
-                              (_autoValidateAuth2 == true) &
-                              (_autoValidateAuth3 == true)) {
+                          (_autoValidateAuth1 == true) &
+                          (_autoValidateAuth2 == true) &
+                          (_autoValidateAuth3 == true)) {
                             userCountryCode = _cCode;
                             userCountryName = _cName;
                             userEmail = _email;
@@ -411,9 +411,9 @@ class _SignUpPageState extends State<SignUpPage> {
                         final form = _formKey.currentState;
                         form!.save();
                         if (form.validate() &
-                            (_autoValidateAuth1 == true) &
-                            (_autoValidateAuth2 == true) &
-                            (_autoValidateAuth3 == true)) {
+                        (_autoValidateAuth1 == true) &
+                        (_autoValidateAuth2 == true) &
+                        (_autoValidateAuth3 == true)) {
                           userCountryCode = _cCode;
                           userCountryName = _cName;
                           userEmail = _email;
@@ -436,7 +436,7 @@ class _SignUpPageState extends State<SignUpPage> {
                               colors: brandColors3,
                             ),
                             borderRadius:
-                                const BorderRadius.all(Radius.circular(15))),
+                            const BorderRadius.all(Radius.circular(15))),
                         child: Center(
                           child: Text('Sign Up'.toUpperCase(),
                               style: const TextStyle(

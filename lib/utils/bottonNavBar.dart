@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:new_cc_dialer/utils/permissions_service.dart';
 import 'package:new_cc_dialer/utils/settings.dart';
 
+// import 'package:open_whatsapp/open_whatsapp.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:requests/requests.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
@@ -19,7 +21,6 @@ import '../screens/dialpad/dialpad.dart';
 import '../screens/menu_screen.dart';
 import '../screens/payments/paypal/paypal.dart';
 import 'app_colors.dart';
-import 'globalfunctions.dart';
 
 class BottomNavBar extends StatefulWidget {
   @override
@@ -29,7 +30,6 @@ class BottomNavBar extends StatefulWidget {
 }
 
 class _BottomNavBarState extends State<BottomNavBar> {
-  bool? _allowBackButton;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   var listener;
@@ -45,11 +45,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
   @override
   void initState() {
     super.initState();
-    // checkContactPermission();
     askPermission();
-    checkData();
-    // getAllContacts();
-    WidgetsFlutterBinding.ensureInitialized();
   }
 
 //############################################################################################################
@@ -84,42 +80,81 @@ class _BottomNavBarState extends State<BottomNavBar> {
         ).show();
       }
     }
+    ;
   }
 
-  Future<bool?> askPermission() async {
+  Future<bool> askPermission() async {
+    FlutterContacts.config.includeNotesOnIos13AndAbove = false;
     PermissionStatus status = await Permission.contacts.request();
     if (status.isDenied == true) {
       askPermission();
-    } else if (status.isPermanentlyDenied == true) {
-      Alert(
-        context: context,
-        type: AlertType.warning,
-        title: "ACCESS DENIED !",
-        desc:
-        "To CALL from your contacts, you need to ALLOW the app to read and sync your contacts in the phone settings ! Restart the application afterwards",
-        buttons: [
-          DialogButton(
-            onPressed: () async {
-              await openAppSettings();
-              // Navigator.push(context, MaterialPageRoute(builder: (context) => BottomNavBar(),));
-            },
-            gradient: LinearGradient(
-              colors: [Colors.grey.shade300, Colors.grey.shade300],
-            ),
-            child: const Text(
-              "COOL",
-              style: TextStyle(color: Colors.black, fontSize: 20),
-            ),
-          )
-        ],
-      ).show().then((value) => askPermission());
+      setState(() {
+        isCheck = false;
+      });
+      return false;
     } else {
       setState(() {
-        allowLoadContacts = true;
+        isCheck = true;
       });
+      getAllContacts();
       return true;
     }
-    return null;
+  }
+
+  bool isCheck = false;
+
+//############################################################################################################
+  checkContactPermission() async {
+    PermissionService().hasPermission(Permission.contacts).then((value) async {
+      if (value) {
+        setState(() {
+          allowLoadContacts = true;
+        });
+      } else {
+        await _askContactPermissions().then((value) {
+          // if (value) {
+          //   if (!mounted) return;
+          //   setState(() {
+          //     allowLoadContacts = true;
+          //   });
+          // } else {
+          //   if (!mounted) return;
+          //   setState(() {
+          //     allowLoadContacts = false;
+          //   });
+          // }
+        });
+      }
+    });
+  }
+
+//############################################################################################################
+  Future<bool> _askContactPermissions() async {
+    Future<bool> val =
+        PermissionService().requestPermissionContacts(onPermissionDenied: () {
+      // Alert(
+      //   context: context,
+      //   type: AlertType.warning,
+      //   title: "ACCESS DENIED !",
+      //   desc:
+      //       "To CALL from your contacts, you need to ALLOW the app to read and sync your contacts in the phone settings ! Restart the application afterwards",
+      //   buttons: [
+      //     DialogButton(
+      //       onPressed: () {
+      //         openAppSettings();
+      //       },
+      //       gradient: LinearGradient(
+      //         colors: [Colors.grey.shade300, Colors.grey.shade300],
+      //       ),
+      //       child: const Text(
+      //         "COOL",
+      //         style: TextStyle(color: Colors.black, fontSize: 20),
+      //       ),
+      //     )
+      //   ],
+      // ).show();
+    });
+    return Future.value(val);
   }
 
   Future<bool> myDialog() async {
@@ -130,7 +165,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
           builder: (context) {
             return AlertDialog(
               actions: [
-                const Center(
+                Center(
                     child: CircleAvatar(
                         radius: 80,
                         backgroundColor: Colors.transparent,
@@ -139,29 +174,20 @@ class _BottomNavBarState extends State<BottomNavBar> {
                           Icons.error_outline_outlined,
                           color: Colors.orangeAccent,
                         ))),
-                const Center(
+                Center(
                     child: Text(
                   "CONFIRMATION",
                   style: TextStyle(fontSize: 22, fontWeight: FontWeight.w400),
                 )),
-                const Center(
+                Center(
                     child: Text(
                   "REQUIRED !",
                   style: TextStyle(fontSize: 22, fontWeight: FontWeight.w400),
                 )),
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(16, 8, 8, 8),
-                  child: Center(
-                    child: Text("Do you really want to close",
-                        style: TextStyle(fontSize: 16)),
-                  ),
-                ),
-                const Padding(
-                  padding: EdgeInsets.only(bottom: 16),
-                  child: Center(
-                    child: Text("this application !",
-                        style: TextStyle(fontSize: 16)),
-                  ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
+                  child: Text("Do you really want to close this application !",
+                      style: TextStyle(fontSize: 16)),
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -206,11 +232,11 @@ class _BottomNavBarState extends State<BottomNavBar> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> _children = [
-      allowLoadContacts ? menuScreen : _contactsMissing,
+      isCheck ? menuScreen : _contactsMissing,
       allowLoadDialer ? _dialPadWidget : _contactsMissing,
-      allowLoadContacts ? _contacts : _contactsMissing,
-      allowLoadContacts ? _callCallList : _contactsMissing,
-      allowLoadContacts ? _paypal : _contactsMissing
+      isCheck ? _contacts : _contactsMissing,
+      isCheck ? _callCallList : _contactsMissing,
+      isCheck ? _paypal : _contactsMissing,
     ];
 
     return WillPopScope(
@@ -222,7 +248,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
           bottomNavigationBar: SizedBox(
             height: 60,
             child: Padding(
-              padding: const EdgeInsets.only(left: 10, right: 10),
+              padding: const EdgeInsets.only(left: 10, right: 10, bottom: 10),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -332,9 +358,9 @@ class _BottomNavBarState extends State<BottomNavBar> {
     );
   }
 
-// @override
-// void dispose() {
-//   // listener.cancel();
-//   super.dispose();
-// }
+  @override
+  void dispose() {
+    // listener.cancel();
+    super.dispose();
+  }
 }
