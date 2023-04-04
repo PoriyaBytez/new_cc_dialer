@@ -448,8 +448,8 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
 
     switch (_state) {
       case CallStateEnum.NONE:
-        _contactName = _filterContacts(remote_identity);
-        if (direction == 'INCOMING') {
+     _contactName = _filterContacts(remote_identity);
+      if (direction == 'INCOMING') {
           InCallService().startRingTone(30);
         } else {
           InCallService().startRingBack();
