@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:country_picker/country_picker.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:flutter/material.dart';
@@ -25,6 +27,8 @@ class _LoginPageState extends State<LoginPage> {
   bool _autoValidateAuth = false;
   String? _cCode;
   String? _cName;
+  String? flag;
+
   final _formKey = GlobalKey<FormState>();
   String? _number;
   Country? _residence;
@@ -147,6 +151,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    double kBoardHeight = MediaQuery.of(context).viewInsets.bottom;
     return Form(
         key: _formKey,
         child: Scaffold(
@@ -215,6 +220,7 @@ class _LoginPageState extends State<LoginPage> {
                                 _residence = country;
                                 _cCode = country.phoneCode; //dialingCode
                                 _cName = country.name;
+                                flag = country.flagEmoji;
                               });
                             },
                           );
@@ -234,7 +240,7 @@ class _LoginPageState extends State<LoginPage> {
                               ]),
                           child: Center(
                             child: Text((_residence != null)
-                                ? " +$_cCode  $_cName"
+                                ? " $flag +$_cCode  $_cName"
                                 : "Select Country",style: TextStyle(fontSize: 16,fontWeight: FontWeight.w300)),
                           ),
                         ),
@@ -253,7 +259,7 @@ class _LoginPageState extends State<LoginPage> {
                             boxShadow: [
                               BoxShadow(color: Colors.white, blurRadius: 4)
                             ]),
-                        child: TextFormField(
+                        child: TextFormField(scrollPadding: EdgeInsets.only(bottom: kBoardHeight),
                           validator: validateMobile,
                           keyboardType: TextInputType.number,
                           onSaved: (value) =>

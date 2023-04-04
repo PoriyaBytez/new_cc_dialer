@@ -1,16 +1,18 @@
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-// import 'package:open_whatsapp/open_whatsapp.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 import '../utils/AuthService.dart';
-import '../utils/settings1.dart';
+import '../utils/settings.dart';
 
 class MenuScreen extends StatefulWidget {
   const MenuScreen({Key? key}) : super(key: key);
@@ -20,6 +22,7 @@ class MenuScreen extends StatefulWidget {
 }
 
 class _MenuScreenState extends State<MenuScreen> {
+  SharedPreferences? _preferences;
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +39,11 @@ class _MenuScreenState extends State<MenuScreen> {
             gradient: LinearGradient(
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
-                colors: <Color>[Color(0xff1034a6), Color(0xff417dc1),Color(0xffdcdcdc)]),
+                colors: <Color>[
+                  Color(0xff1034a6),
+                  Color(0xff417dc1),
+                  Color(0xffdcdcdc)
+                ]),
           ),
         ),
       ),
@@ -55,26 +62,39 @@ class _MenuScreenState extends State<MenuScreen> {
                   "Call cheap to Africa, Almost as if IT'S FREE. Download our free APP at: http://onelink.to/wg4zbg");
             },
           ),
-          const Divider(height: 2,color: Colors.blue,),
+          const Divider(height: 2, color: Colors.blue,),
           ListTile(
             leading: const Icon(FontAwesomeIcons.whatsapp, color: Colors.green),
             title: const Text("Whatsapp Us", style: TextStyle(fontSize: 17)),
-            onTap: () {
-              var whatsappUrl =
-                  "whatsapp://send?phone=$supportWhatsappNumber" "&text=${Uri.encodeComponent("My Account Number is: $sipUsername. My Name is: $accountUsername. My Cell Number is: +$userCountryCode$userCellNumber. Find my message below :")}";
-              launch(whatsappUrl);
+            onTap: () async {
+              _preferences = await SharedPreferences.getInstance();
+              String? countryCode = _preferences!.getString('countryCode');
+              String? cellNumber = _preferences!.getString('countryCellNumber');
+              var whatsAppUrlAndroid =
+                  "whatsapp://send?phone=$supportWhatsappNumber"
+                  "&text=${Uri.encodeComponent("My Account Number is: $sipUsername. My Name is: $accountUsername. My Cell Number is: +$countryCode$cellNumber  . Find my message below :")}";
+              var whatsAppUralIos =
+                  "https://wa.me/$supportWhatsappNumber?text=${Uri.encodeComponent("My Account Number is: $sipUsername. My Name is: $accountUsername. My Cell Number is: +$countryCode$cellNumber  . Find my message below :")}";
+              if (Platform.isIOS) {
+                launchUrlString(whatsAppUralIos);
+              } else {
+                launchUrlString(whatsAppUrlAndroid);
+              }
             },
           ),
-          const Divider(height: 2,color: Colors.blue,),
+          const Divider(height: 2, color: Colors.blue,),
           ListTile(
             leading: const Icon(Icons.email, color: Colors.blue),
             title: const Text("Email Us", style: TextStyle(fontSize: 17)),
-            onTap: () {
+            onTap: () async {
+              _preferences = await SharedPreferences.getInstance();
+              String? countryCode = _preferences!.getString('countryCode');
+              String? cellNumber = _preferences!.getString('countryCellNumber');
               _launchEmailer(supportEmail, contactUsSubject,
-                  ("My Account Number is: $sipUsername. My Name is: +$userCountryCode$userCellNumber. My Cell Number is: +$userCountryCode$userCellNumber. Find my message below :"));
+                  ("My Account Number is: $sipUsername. My Name is: $sipUsername. My Cell Number is: +$countryCode$cellNumber. Find my message below :"));
             },
           ),
-          const Divider(height: 2,color: Colors.blue,),
+          const Divider(height: 2, color: Colors.blue,),
           ListTile(
             leading: const Icon(Icons.call, color: Colors.blue),
             title: const Text("Call Us", style: TextStyle(fontSize: 17)),
@@ -82,21 +102,21 @@ class _MenuScreenState extends State<MenuScreen> {
               _launchCaller(supportNumber);
             },
           ),
-          const Divider(height: 2,color: Colors.blue,),
+          const Divider(height: 2, color: Colors.blue,),
           ListTile(
             leading: const Icon(Icons.flag, color: Colors.blue),
             title: const Text("Privacy Policy", style: TextStyle(fontSize: 17)),
             onTap: () {
               // BuildContext context;
-              Navigator.pushNamed(context, '/TsCs');
+              Navigator.pushNamed(context, '/TsCs'); //'/TsCs'
             },
           ),
-          const Divider(height: 2,color: Colors.blue,),
+          const Divider(height: 2, color: Colors.blue,),
           const Align(
             alignment: FractionalOffset.bottomLeft,
             child: ListTile(
               title: Text(
-                "Version 1.0",
+                "Version 4(1.0.0)",
                 style: TextStyle(
                   color: Colors.blue,
                   fontSize: 12,
@@ -114,65 +134,92 @@ class _MenuScreenState extends State<MenuScreen> {
                     alignment: FractionalOffset.bottomCenter,
                     child: ListTile(
                       leading:
-                      const Icon(FontAwesomeIcons.signOutAlt, color: Colors.red),
-                      title: const Text("Log Out", style: TextStyle(fontSize: 17)),
-                      onTap: ()  {
+                      const Icon(
+                          FontAwesomeIcons.signOutAlt, color: Colors.red),
+                      title: const Text(
+                          "Log Out", style: TextStyle(fontSize: 17)),
+                      onTap: () {
                         showDialog(
+                          //show confirm dialogue
+                          //the return value will be from "Yes" or "No" options
                           context: context,
-                          builder: (BuildContext context) {
+                          builder: (context) {
                             return AlertDialog(
-                              title: const Text("Exit!"),
-                              content: const Text("Do you really want to close this application !"),
-                              actions: <Widget>[
-                                Row(
-                                  children: [
-                                    const SizedBox(width: 30,),
-                                    InkWell(onTap:(){
-                                      Navigator.pop(context);
-                                    },
-                                      child: Container(
-                                        alignment: Alignment.center,
-                                        height: 30,
-                                        width: 80,
-                                        decoration: BoxDecoration(
-                                          gradient: LinearGradient(
-                                            begin: Alignment.centerLeft,
-                                            end: Alignment.centerRight,
-                                            colors: brandColors3,
-                                          ),
-                                        ),
-                                        child: const Text(
-                                          "No",
-                                          style: TextStyle(color: Colors.white),
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 35,),
-                                    InkWell(onTap:()async{
-                                      _cacheClearDetails();
-                                      // BuildContext context;
-                                      await  Provider.of<AuthService>(context,listen: false).logout();
-                                      SystemNavigator.pop();
-                                    },
-                                      child: Container(
-                                        alignment: Alignment.center,
-                                        height: 30,
-                                        width: 80,
-                                        decoration: BoxDecoration(
-                                          gradient: LinearGradient(
-                                            begin: Alignment.centerLeft,
-                                            end: Alignment.centerRight,
-                                            colors: brandColors3,
-                                          ),
-                                        ),
-                                        child: const Text(
-                                          "Yes",
-                                          style: TextStyle(color: Colors.white),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+                              actions: [
+                                const Center(
+                                    child: CircleAvatar(
+                                        radius: 80,
+                                        backgroundColor: Colors.transparent,
+                                        child: Icon(
+                                          size: 100,
+                                          Icons.error_outline_outlined,
+                                          color: Colors.orangeAccent,
+                                        ))),
+                                const Center(
+                                    child: Text(
+                                      "CONFIRMATION",
+                                      style: TextStyle(fontSize: 22,
+                                          fontWeight: FontWeight.w400),
+                                    )),
+                                const Center(
+                                    child: Text(
+                                      "REQUIRED !",
+                                      style: TextStyle(fontSize: 22,
+                                          fontWeight: FontWeight.w400),
+                                    )),
+                                const Padding(
+                                  padding: EdgeInsets.fromLTRB(16, 8, 8, 8),
+                                  child: Center(
+                                    child: Text("Do you really want to close",
+                                        style: TextStyle(fontSize: 16)),
+                                  ),
                                 ),
+                                const Padding(
+                                  padding: EdgeInsets.only(bottom: 16),
+                                  child: Center(
+                                    child: Text("this application !",
+                                        style: TextStyle(fontSize: 16)),
+                                  ),
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment
+                                      .spaceEvenly,
+                                  children: [
+                                    Expanded(
+                                      child: DialogButton(
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                        },
+                                        gradient: LinearGradient(
+                                          colors: brandColors3,
+                                        ),
+                                        child: const Text(
+                                          "NO",
+                                          style: TextStyle(color: Colors.white,
+                                              fontSize: 20),
+                                        ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: DialogButton(
+                                        onPressed: () async {
+                                          _cacheClearDetails();
+                                          await Provider.of<AuthService>(
+                                              context, listen: false).logout();
+                                          SystemNavigator.pop();
+                                        },
+                                        gradient: LinearGradient(
+                                          colors: brandColors3,
+                                        ),
+                                        child: const Text(
+                                          "YES",
+                                          style: TextStyle(color: Colors.white,
+                                              fontSize: 20),
+                                        ),
+                                      ),
+                                    )
+                                  ],
+                                )
                               ],
                             );
                           },
@@ -188,174 +235,13 @@ class _MenuScreenState extends State<MenuScreen> {
   }
 }
 
-drawer(BuildContext context) {
-  return
-    SizedBox(height: 520,
-    child: Drawer(
-      child:
-          Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              SizedBox(height: 100,
-                child: DrawerHeader(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                      colors: brandColors3,
-                    ),
-                    image: const DecorationImage(
-                      image: ExactAssetImage("lib/assets/images/logo.png"),
-                      fit: BoxFit.cover,
-                    ),
-                  ), child: null,
-                ),
-              ),
-              ListTile(
-                leading: const Icon(Icons.share, color: Colors.blue),
-                title: const Text(
-                  "Share App with Friends",
-                  style: TextStyle(fontSize: 15),
-                ),
-                onTap: () {
-                  Share.share(
-                      "Call cheap to Africa, Almost as if IT'S FREE. Download our free APP at: http://onelink.to/wg4zbg");
-                },
-              ),
-              ListTile(
-                leading: const Icon(FontAwesomeIcons.whatsapp, color: Colors.green),
-                title: const Text("Whatsapp Us", style: TextStyle(fontSize: 15)),
-                onTap: () {
-                  // FlutterOpenWhatsapp.sendSingleMessage(supportWhatsappNumber,
-                  //     "My Account Number is: $sipUsername. My Name is: +$accountUsername. My Cell Number is: +$userCountryCode$userCellNumber. Find my message below :");
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.email, color: Colors.blue),
-                title: const Text("Email Us", style: TextStyle(fontSize: 15)),
-                onTap: () {
-                  _launchEmailer(supportEmail, contactUsSubject,
-                      ("My Account Number is: $sipUsername. My Name is: +$userCountryCode$userCellNumber. My Cell Number is: +$userCountryCode$userCellNumber. Find my message below :"));
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.call, color: Colors.blue),
-                title: const Text("Call Us", style: TextStyle(fontSize: 15)),
-                onTap: () {
-                  _launchCaller(supportNumber);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.flag, color: Colors.blue),
-                title: const Text("Privacy Policy", style: TextStyle(fontSize: 15)),
-                onTap: () {
-                  // BuildContext context;
-                  Navigator.pushNamed(context, '/TsCs');
-                },
-              ),
-              Container(
-                child: const Align(
-                  alignment: FractionalOffset.bottomLeft,
-                  child: ListTile(
-                    title: Text(
-                      "Version 4(1.0.0)",
-                      style: TextStyle(
-                        color: Colors.blue,
-                        fontSize: 9,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              Container(
-                  padding:  const EdgeInsets.fromLTRB(0, 0, 0, 0),
-                   alignment: Alignment.bottomCenter,
-                  decoration: const BoxDecoration(color: Color(0xfff0f8ff)),
-                  child: Column(
-                    children: <Widget>[
-                      Align(
-                        alignment: FractionalOffset.bottomCenter,
-                        child: ListTile(
-                          leading:
-                          const Icon(FontAwesomeIcons.signOutAlt, color: Colors.red),
-                          title: const Text("Log Out", style: TextStyle(fontSize: 17)),
-                          onTap: ()  {
-
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title:  const Text("Exit!"),
-                                  content:  const Text("Do you really want to close this application !"),
-                                  actions: <Widget>[
-                                    Row(
-                                      children: [
-                                        const SizedBox(width: 30,),
-                                        InkWell(onTap:(){
-                                          Navigator.pop(context);
-                                        },
-                                          child: Container(
-                                            alignment: Alignment.center,
-                                            height: 30,
-                                            width: 80,
-                                            decoration: BoxDecoration(
-                                              gradient: LinearGradient(
-                                                begin: Alignment.centerLeft,
-                                                end: Alignment.centerRight,
-                                                colors: brandColors3,
-                                              ),
-                                            ),
-                                            child: const Text(
-                                              "No",
-                                              style: TextStyle(color: Colors.white),
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 35,),
-                                        InkWell(onTap:()async{
-                                          _cacheClearDetails();
-                                          // BuildContext context;
-                                          await  Provider.of<AuthService>(context,listen: false).logout();
-                                          SystemNavigator.pop();
-                                        },
-                                          child: Container(
-                                            alignment: Alignment.center,
-                                            height: 30,
-                                            width: 80,
-                                            decoration: BoxDecoration(
-                                              gradient: LinearGradient(
-                                                begin: Alignment.centerLeft,
-                                                end: Alignment.centerRight,
-                                                colors: brandColors3,
-                                              ),
-                                            ),
-                                            child: const Text(
-                                              "Yes",
-                                              style: TextStyle(color: Colors.white),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  )),
-            ],
-          ),
-    ),
-  );
-}
 
 _launchEmailer(String email, String mailSubject, String mailBody) async {
-  String url = "mailto:$email?subject=$mailSubject&body=$mailBody";
-  if (await canLaunch(url)) {
-    await launch(url);
+  String url =
+  Uri.encodeFull("mailto:$email?subject=$mailSubject&body=$mailBody");
+  if (await launchUrlString(url)) {
+    await launchUrlString(url);
+    ;
   } else {
     launch(supportWebsiteURL, forceWebView: true, forceSafariVC: false);
     throw 'Could not launch $url';
@@ -364,8 +250,8 @@ _launchEmailer(String email, String mailSubject, String mailBody) async {
 
 _launchCaller(String number) async {
   String url = "tel:$number";
-  if (await canLaunch(url)) {
-    await launch(url);
+  if (await launchUrlString(url)) {
+    await launchUrlString(url);
   } else {
     launch(supportWebsiteURL, forceWebView: true, forceSafariVC: false);
     throw 'Could not launch $url';

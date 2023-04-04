@@ -17,6 +17,7 @@ import 'package:new_cc_dialer/utils/settings.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sip_ua/sip_ua.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -63,26 +64,29 @@ Future<void> main() async {
   );
 }
 
+typedef PageContentBuilder = Widget Function(
+    [SIPUAHelper? helper, Object? arguments]);
+
 class MyMainApp extends StatelessWidget {
   final navigatorKey = GlobalKey<NavigatorState>();
-
+  Map<String, PageContentBuilder> routes ={
+    '/root': ([SIPUAHelper? helper, Object? arguments]) => MyMainApp(),
+    '/register': ([SIPUAHelper? helper, Object? arguments]) => RegisterWidget(helper!),
+    '/callscreen': ([SIPUAHelper? helper, Object? arguments]) => CallScreenWidget(helper!,arguments as Call?),
+    '/dialpad': ([SIPUAHelper? helper, Object? arguments]) => DialPadWidget(helper!),
+    '/about': ([SIPUAHelper? helper, Object? arguments]) => AboutWidget(),
+    '/TsCs': ([SIPUAHelper? helper, Object? arguments]) => TsCs(),
+    '/paypal': ([SIPUAHelper? helper, Object? arguments]) => PayPal(),
+    '/Login': ([SIPUAHelper? helper, Object? arguments]) =>  LoginPage(),
+    '/SignUp': ([SIPUAHelper? helper, Object? arguments]) => SignUpPage(),
+    '/OtpPage': ([SIPUAHelper? helper, Object? arguments]) => OtpPage()
+  };
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Call Continent',
+      title: 'Molveni',
       debugShowCheckedModeBanner: false,
-      routes: {
-        '/root': (context) => MyMainApp(),
-        '/register': (context) => RegisterWidget(helper),
-        '/callscreen': (context) => CallScreenWidget(helper),
-        '/dialpad': (context) => DialPadWidget(helper),
-        '/about': (context) => AboutWidget(),
-        '/TsCs': (context) => TsCs(),
-        '/paypal': (context) => PayPal(),
-        '/Login': (context) =>  LoginPage(),
-        '/SignUp': (context) => SignUpPage(),
-        '/OtpPage': (context) => OtpPage()
-      },
+      // routes: routes,
       home:
       FutureBuilder<dynamic> (
         future: Provider.of<AuthService>(context).getUser(),
@@ -98,6 +102,25 @@ class MyMainApp extends StatelessWidget {
           }
         },
       ),
+      onGenerateRoute: _onGenerateRoute,
     );
+  }
+
+  Route<dynamic>? _onGenerateRoute(RouteSettings settings) {
+    final String? name = settings.name;
+    final PageContentBuilder? pageContentBuilder = routes[name!];
+    if (pageContentBuilder != null) {
+      if (settings.arguments != null) {
+        final Route route = MaterialPageRoute<Widget>(
+            builder: (context) =>
+                pageContentBuilder(helper, settings.arguments));
+        return route;
+      } else {
+        final Route route = MaterialPageRoute<Widget>(
+            builder: (context) => pageContentBuilder(helper));
+        return route;
+      }
+    }
+    return null;
   }
 }

@@ -7,7 +7,7 @@ import '../screens/contacts/shared/models/contact.dart';
 
 TextEditingController? textController;
 final SIPUAHelper helper = SIPUAHelper();
-
+Object? arguments;
 GlobalKey navBarGlobalKey = GlobalKey(debugLabel: 'bottomAppBar');
 
 String myTarrif = '\$ --.--';
@@ -31,8 +31,7 @@ List<Color> brandColors = [Colors.black, Colors.black];
 List<Color> brandColors1 = [Colors.black, Colors.black];
 
 // Permsission Vars
-List<Contact>? contacts = [];
-List<Contact>? searchContacts = [];
+List<Contact> contactsCallScreen  = [];
 bool allowLoadContacts = false;
 bool allowLoadDialer = true;
 bool allowBluetooth = false;
@@ -96,8 +95,8 @@ class appcolor {
   static const Color dialmainbackground = Color(0xfff0f8ff);
 }
 getAllContacts() async {
-  contacts = await FlutterContacts.getContacts(
-      withPhoto: false, withProperties: true);
-  print("contacts bottom ${contacts!.length}");
+  contactsCallScreen  = await FlutterContacts.getContacts(withPhoto: false, withProperties: true);
+  FlutterContacts.config.includeNotesOnIos13AndAbove = true;
+  print("contacts bottom ${contactsCallScreen.length}");
 
 }

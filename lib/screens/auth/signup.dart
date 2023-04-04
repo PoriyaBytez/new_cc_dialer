@@ -26,6 +26,7 @@ class _SignUpPageState extends State<SignUpPage> {
   Country? _residence;
   String _cCode = '1';
   String? _cName;
+  String? flag;
   String? _number;
   String? _fullname;
   String? _email;
@@ -212,6 +213,8 @@ class _SignUpPageState extends State<SignUpPage> {
 
   @override
   Widget build(BuildContext context) {
+    double kBoardHeight = MediaQuery.of(context).viewInsets.bottom;
+
     return Form(
       key: _formKey,
       child: Scaffold(
@@ -294,6 +297,7 @@ class _SignUpPageState extends State<SignUpPage> {
                               _residence = country;
                               _cCode = country.phoneCode; //dialingCode
                               _cName = country.name;
+                              flag = country.flagEmoji;
                             });
                           },
                         );
@@ -312,7 +316,7 @@ class _SignUpPageState extends State<SignUpPage> {
                             ]),
                         child: Center(
                           child: Text((_residence != null)
-                              ? " ${_cCode}  ${_cName}"
+                              ? " $flag +$_cCode  $_cName"
                               : "Select Country",style: TextStyle(fontSize: 16,fontWeight: FontWeight.w300)),
                         ),
                       ),
@@ -329,7 +333,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           boxShadow: [
                             BoxShadow(color: Colors.white, blurRadius: 4)
                           ]),
-                      child: TextFormField(
+                      child: TextFormField(scrollPadding: EdgeInsets.only(bottom: kBoardHeight),
                         keyboardType: TextInputType.number,
                         validator: validateMobile,
                         onSaved: (value) => _number = value!.trim(), // <= NEW
@@ -356,7 +360,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           boxShadow: [
                             BoxShadow(color: Colors.white, blurRadius: 4)
                           ]),
-                      child: TextFormField(
+                      child: TextFormField(scrollPadding: EdgeInsets.only(bottom: kBoardHeight),
                         keyboardType: TextInputType.text,
                         validator: validateName,
                         onSaved: (value) => _fullname = value!.trim(),
@@ -383,7 +387,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           boxShadow: [
                             BoxShadow(color: Colors.white, blurRadius: 4)
                           ]),
-                      child: TextFormField(
+                      child: TextFormField(scrollPadding: EdgeInsets.only(bottom: kBoardHeight),
                         keyboardType: TextInputType.emailAddress,
                         //TextInputType.emailAddress
                         validator: validateEmail,

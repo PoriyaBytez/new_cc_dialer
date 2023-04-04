@@ -18,7 +18,6 @@ class PayPal extends StatefulWidget {
 class PayPalPage extends State<PayPal> {
   String src = paypalUrl + '?acc=';
 
-  // InAppWebViewController? webView;
   WebViewController? controller;
 
   static Key key = UniqueKey();

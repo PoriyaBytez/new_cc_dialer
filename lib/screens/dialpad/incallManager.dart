@@ -1,21 +1,17 @@
 import 'dart:async';
-
 import 'package:keep_screen_on/keep_screen_on.dart';
 import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 import 'dart:io';
 import 'package:proximity_screen_lock/proximity_screen_lock.dart';
 
 class InCallService {
-  void startRingTone(int _timeout) {
 
+  void startRingTone(int _timeout) {
     KeepScreenOn.turnOn(true);
     if (Platform.isAndroid) {
       KeepScreenOn.turnOn();
     }
     FlutterRingtonePlayer.playRingtone();
-    FlutterRingtonePlayer.play(fromAsset: "lib/assets/images/phone_tone.mp3",ios: IosSounds.glass,android: AndroidSound(_timeout));
-
-    // incallManager.startRingtone(RingtoneUriType.DEFAULT, 'default', _timeout);
   }
 
   Future<void> stopRingTone()  async {
@@ -25,8 +21,6 @@ class InCallService {
   void stopRingBack(bool _busy) {
 
     if (_busy) {
-      FlutterRingtonePlayer.play(fromAsset: "lib/assets/images/phone_tone.mp3",ios: IosSounds.glass);
-      // incallManager.stop(busytone: '_BUNDLE_');
       KeepScreenOn.turnOn(false);
       if (Platform.isAndroid) {
         KeepScreenOn.turnOff();
@@ -49,7 +43,7 @@ class InCallService {
       KeepScreenOn.turnOn();
     }
      // incallManager.startRingback();
-    FlutterRingtonePlayer.play(fromAsset: "lib/assets/images/phone_tone.mp3");
+    // FlutterRingtonePlayer.play(fromAsset: "lib/assets/images/phone_tone.mp3");
     // incallManager.start(
     // media: MediaType.AUDIO, auto: true, ringback: '_BUNDLE_');
   }

@@ -251,15 +251,16 @@ class UserListPage extends State<UserList> {
                           onTap: () async {
                             if (!mounted) return;
                             var _dest1 = dest;
-
-                            dest = _calledNumber(snapshot.data[index])
-                                .replaceAll(' ', '')
-                                .replaceAll('+', '00')
-                                .replaceFirst('', '00')
-                                .toString();
-                            if (dest == 'NoCallsYet') {
+                            if (snapshot.data[index] == 'NoCallsYet') {
                               dest = _dest1;
+                            }else{
+                              dest = _calledNumber(snapshot.data[index])
+                                  .replaceAll(' ', '')
+                                  .replaceAll('+', '00')
+                                  .replaceFirst('', '00')
+                                  .toString();
                             }
+
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -270,7 +271,6 @@ class UserListPage extends State<UserList> {
                             padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
                             child: Container(
                               decoration: const BoxDecoration(
-                                //color: Colors.black26,
                                 borderRadius:
                                     BorderRadius.all(Radius.circular(15)),
                               ),

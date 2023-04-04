@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter_countdown_timer/countdown_timer_controller.dart';
 import 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
 import 'package:flutter/material.dart';
+import 'package:otp_text_field/otp_field.dart';
+import 'package:otp_text_field/style.dart';
 import 'package:provider/provider.dart';
 import 'package:requests/requests.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
@@ -171,10 +173,9 @@ class _OtpPageState extends State<OtpPage> {
         },
         bodyEncoding: RequestBodyEncoding.JSON,
         timeoutSeconds: 3000);
-
     if (result.success) {
+      print('result == ${result.body}');
       if ((json.decode(result.content()).containsKey("payload"))) {
-        // element.displayName.toString() != null;
         setState(() {
           otpIsCorrect = true;
           String _accountUsername = (json.decode(result.content())['payload']
@@ -251,8 +252,9 @@ class _OtpPageState extends State<OtpPage> {
         },
         bodyEncoding: RequestBodyEncoding.JSON,
         timeoutSeconds: 3000);
-
+    print("response==> ${result.body}");
     if (result.success) {
+
       if ((json.decode(result.content()).containsKey("action"))) {
         var _routeAction = (json.decode(result.content())['action']).toString();
         if (_routeAction == 'LogIN') {
@@ -260,6 +262,8 @@ class _OtpPageState extends State<OtpPage> {
               " The Mobile Number or Email provided already exists, Please try Log-In instead";
           myDialog(_message, '/Login');
         }else{
+          print('sinup result else==> ${result.body} ');
+
           Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
             return BottomNavBar();
           },));
@@ -303,7 +307,7 @@ class _OtpPageState extends State<OtpPage> {
   }
 
 //#################################################################################################################################
-  _apiChooser(String? signorLog) {
+  _apiChooser(String? signorLog) async {
     (signorLog == 'login')
         ? _logInAPI(userCountryCode, userCellNumber)
         : _signUpAPI(userFullname, userCountryCode, userCellNumber, userEmail,
@@ -314,6 +318,9 @@ class _OtpPageState extends State<OtpPage> {
     (signorLog == 'login')
         ? _displaylinkNav = '/Login'
         : _displaylinkNav = '/SignUp';
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('countryCode', userCountryCode!);
+    prefs.setString('countryCellNumber', userCellNumber!);
   }
 
 //########################################################################################################################################################################
@@ -411,15 +418,28 @@ class _OtpPageState extends State<OtpPage> {
                         selectedDecoration: BoxDecoration(
                             // borderSide: BorderSide.none,
                             borderRadius: BorderRadius.circular(10)),
-
                         onChange: (code) {
                           Provider.of<AuthService>(context, listen: false);
-                          setState(() {
-                            t1.text = code;
-                          });
                           _onOtpCallBack(code, false);
                         },
                       ),
+                      // OTPTextField(
+                      //   length: otpCodeLength,
+                      //   width: MediaQuery.of(context).size.width,
+                      //   fieldWidth: 80,
+                      //   style: TextStyle(
+                      //       fontSize: 17
+                      //   ),
+                      //   textFieldAlignment: MainAxisAlignment.spaceAround,
+                      //   fieldStyle: FieldStyle.underline,
+                      //   onCompleted: (pin) {
+                      //     Provider.of<AuthService>(context, listen: false);
+                      //     // setState(() {
+                      //     //   t1.text = pin;
+                      //     // });
+                      //     _onOtpCallBack(pin, false);
+                      //   },
+                      // ),
                       const Spacer(),
                       Container(
                         height: 50,
