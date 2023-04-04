@@ -6,16 +6,12 @@ import 'package:proximity_screen_lock/proximity_screen_lock.dart';
 
 class InCallService {
 
-
-
   void startRingTone(int _timeout) {
-
     KeepScreenOn.turnOn(true);
     if (Platform.isAndroid) {
       KeepScreenOn.turnOn();
     }
     FlutterRingtonePlayer.playRingtone();
-    FlutterRingtonePlayer.play(ios: IosSounds.glass,android: AndroidSounds.ringtone);
   }
 
   Future<void> stopRingTone()  async {

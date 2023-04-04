@@ -10,10 +10,12 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 
 import 'incallManager.dart';
 
+
 class CallScreenWidget extends StatefulWidget {
-  CallScreenWidget(this._helper, {Key? key}) : super(key: key);
+  CallScreenWidget(this._helper,this._call, {Key? key}) : super(key: key);
 
   final SIPUAHelper _helper;
+  final Call? _call;
 
   @override
   _MyCallScreenWidget createState() => _MyCallScreenWidget();
@@ -22,27 +24,38 @@ class CallScreenWidget extends StatefulWidget {
 class _MyCallScreenWidget extends State<CallScreenWidget>
     implements SipUaHelperListener {
 
-
-  bool _audioMuted = false;
   String? _contactName;
-  bool _hold = false;
-  String? _holdOriginator;
-  RTCVideoRenderer? _localRenderer = RTCVideoRenderer();
-  MediaStream? _localStream;
-  double? _localVideoHeight;
-  EdgeInsetsGeometry? _localVideoMargin;
-  double? _localVideoWidth;
-  RTCVideoRenderer? _remoteRenderer = RTCVideoRenderer();
-  MediaStream? _remoteStream;
-  bool _showNumPad = false;
-  bool _speakerOn = false;
   bool _timerStarted = false;
   bool _toggledOnce = false;
-  CallStateEnum _state = CallStateEnum.NONE;
-  String _timeLabel = '';
+  RTCVideoRenderer? _localRenderer = RTCVideoRenderer();
+  RTCVideoRenderer? _remoteRenderer = RTCVideoRenderer();
+  double? _localVideoHeight;
+  double? _localVideoWidth;
+  EdgeInsetsGeometry? _localVideoMargin;
+  MediaStream? _localStream;
+  MediaStream? _remoteStream;
+
+  bool _showNumPad = false;
+  String _timeLabel = '';//00:00
   Timer? _timer;
+  bool _audioMuted = false;
   bool _videoMuted = false;
-  Call? pcall;
+  bool _speakerOn = false;
+  bool _hold = false;
+  String? _holdOriginator;
+  CallStateEnum _state = CallStateEnum.NONE;
+  SIPUAHelper? get helper => widget._helper;
+
+  bool get voiceonly =>
+      (_localStream == null || _localStream!.getVideoTracks().isEmpty) &&
+          (_remoteStream == null || _remoteStream!.getVideoTracks().isEmpty);
+
+  String? get remote_identity => call?.remote_identity;
+
+  String? get direction => call?.direction;
+
+  Call? get call => widget._call;
+
 
   @override
   void callStateChanged(Call call, CallState callState) {
@@ -94,9 +107,6 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
       case CallStateEnum.REFER:
         break;
     }
-    setState(() {
-      pcall = call;
-    });
   }
 
   @override
@@ -109,9 +119,9 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
   @override
   initState() {
     super.initState();
+    getAllContacts();
     _initRenderers();
     helper!.addSipUaHelperListener(this);
-    getAllContacts();
   }
 
   @override
@@ -119,16 +129,6 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
 
   @override
   void transportStateChanged(TransportState state) {}
-
-  SIPUAHelper? get helper => widget._helper;
-
-  bool get voiceonly =>
-      (_localStream == null || _localStream!.getVideoTracks().isEmpty) &&
-      (_remoteStream == null || _remoteStream!.getVideoTracks().isEmpty);
-
-  String? get remote_identity => pcall?.remote_identity;
-
-  String? get direction => pcall?.direction;
 
   void _startTimer() {
     _timer = Timer.periodic(const Duration(seconds: 1), (Timer timer) {
@@ -140,7 +140,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
               .join(':');
         });
       } else {
-        _timer!.cancel();
+        _timer?.cancel();
       }
     });
   }
@@ -226,14 +226,14 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
 
   void _handleHangup() {
     InCallService().stopRingTone();
-    pcall!.hangup({'status_code': 603});
+    call?.hangup();
     ProximityScreenLock.setActive(false);
     _timer?.cancel();
   }
 
   void _handleAccept() async {
-    bool remoteHasVideo = pcall!.remote_has_audio;
-    pcall!.answer(helper!.buildCallOptions(!remoteHasVideo));
+    bool remoteHasVideo = call!.remote_has_audio;
+    call!.answer(helper!.buildCallOptions(!remoteHasVideo));
 
     InCallService().stopRingTone();
     if (_timerStarted == false) {
@@ -250,25 +250,25 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
 
   void _muteAudio() {
     if (_audioMuted) {
-      pcall!.unmute(true, false);
+      call!.unmute(true, false);
     } else {
-      pcall!.mute(true, false);
+      call!.mute(true, false);
     }
   }
 
   void _muteVideo() {
     if (_videoMuted) {
-      pcall!.unmute(false, true);
+      call!.unmute(false, true);
     } else {
-      pcall!.mute(false, true);
+      call!.mute(false, true);
     }
   }
 
   void _handleHold() {
     if (_hold) {
-      pcall!.unhold();
+      call!.unhold();
     } else {
-      pcall!.hold();
+      call!.hold();
     }
   }
 
@@ -295,7 +295,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
             TextButton(
               child: Text('Ok'),
               onPressed: () {
-                pcall!.refer(_transferTarget);
+                call!.refer(_transferTarget);
                 Navigator.of(context).pop();
               },
             ),
@@ -312,7 +312,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
   }
 
   void _handleDtmf(String tone) {
-    pcall!.sendDTMF(tone);
+    call!.sendDTMF(tone);
   }
 
   void _handleKeyPad() {
@@ -322,12 +322,12 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
   }
 
   Future<void> _toggleSpeaker() async {
-      print("_toggleSpeaker is called");
-      setState(() {
-        _speakerOn = !_speakerOn;
-      });
-      Helper.setSpeakerphoneOn(!_speakerOn);
-      InCallService().proximity(!_speakerOn);
+    print("_toggleSpeaker is called");
+    setState(() {
+      _speakerOn = !_speakerOn;
+    });
+    Helper.setSpeakerphoneOn(!_speakerOn);
+    InCallService().proximity(!_speakerOn);
   }
 
   //#########################################################################################################################################
@@ -350,37 +350,35 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
     });
   }
 
-  String? _filterContacts(String? callednum) {
-    String searchTermFlatten = flattenPhoneNumber(callednum ?? "");
+  String? _filterContacts(String? calledNum) {
+    String searchTermFlatten = flattenPhoneNumber(calledNum ?? "");
     String? phnFlattened;
-    bool numFound = false;
     String? numTest1;
     String? numTest2;
     String? result;
 
-    if (contacts.isNotEmpty) {
-      for (var i = 0; i < contacts.length; i++) {
-        if (contacts[i].phones.isNotEmpty) {
-          if (contacts[i].phones.elementAt(0).number.isNotEmpty) {
-            numTest1 = contacts[i].phones.elementAt(0).number;
+    if (contactsCallScreen.isNotEmpty) {
+      for (var i = 0; i < contactsCallScreen.length; i++) {
+        if (contactsCallScreen[i].phones.isNotEmpty) {
+          if (contactsCallScreen[i].phones.elementAt(0).number.isNotEmpty) {
+            numTest1 = contactsCallScreen[i].phones.elementAt(0).number;
             phnFlattened = flattenContactNumber(numTest1);
-          } else if (contacts[i].phones.length > 1) {
-            numTest2 = contacts[i].phones.elementAt(1).number;
+          } else if (contactsCallScreen[i].phones.length > 1) {
+            numTest2 = contactsCallScreen[i].phones.elementAt(1).number;
             phnFlattened = flattenContactNumber(numTest2);
           }
 
           if (phnFlattened!.contains(searchTermFlatten)) {
             if(i!=0) {
-              result = contacts[i].displayName;
+              result = contactsCallScreen[i].displayName;
             }
-            numFound = true;
             break;
           }
         }
       }
     }
     if (result == null) {
-        return 'UNKNOWN';
+      return 'UNKNOWN';
     } else {
       return result;
     }
@@ -414,17 +412,17 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
 
     return lables
         .map((row) => Padding(
-            padding: const EdgeInsets.all(3),
-            child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: row
-                    .map((label) => ActionButton(
-                          title: label.keys.first,
-                          subTitle: label.values.first,
-                          onPressed: () => _handleDtmf(label.keys.first),
-                          number: true,
-                        ))
-                    .toList())))
+        padding: const EdgeInsets.all(3),
+        child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: row
+                .map((label) => ActionButton(
+              title: label.keys.first,
+              subTitle: label.values.first,
+              onPressed: () => _handleDtmf(label.keys.first),
+              number: true,
+            ))
+                .toList())))
         .toList();
   }
 
@@ -450,8 +448,8 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
 
     switch (_state) {
       case CallStateEnum.NONE:
-        _contactName = _filterContacts(remote_identity);
-        if (direction == 'INCOMING') {
+     _contactName = _filterContacts(remote_identity);
+      if (direction == 'INCOMING') {
           InCallService().startRingTone(30);
         } else {
           InCallService().startRingBack();
@@ -468,24 +466,9 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
             onPressed: () => _handleAccept(),
           ));
           basicActions.add(hangupBtn);
+          ColorLoader();
         } else {
           basicActions.add(hangupBtn);
-          if (voiceonly) {
-            advanceActions.add(ActionButton(
-              title: _speakerOn ? 'speaker' : 'speaker',
-              icon: _speakerOn ? Icons.volume_up : Icons.volume_off,
-              checked: _speakerOn,
-              onPressed: () => _toggleSpeaker(),
-            ));
-          }
-          else {
-            advanceActions.add(ActionButton(
-              title: _videoMuted ? "camera on" : 'camera off',
-              icon: _videoMuted ? Icons.videocam : Icons.videocam_off,
-              checked: _videoMuted,
-              onPressed: () => _muteVideo(),
-            ));
-          }
         }
         break;
       case CallStateEnum.ACCEPTED:
@@ -493,22 +476,6 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
         break;
       case CallStateEnum.CONFIRMED:
         _contactName = _filterContacts(remote_identity);
-        if (direction == 'INCOMING') {
-          InCallService().stopRingTone();
-          if (_toggledOnce == false) {
-            setState(() {
-              _speakerOn = true;
-              _toggledOnce = true;
-              _toggleSpeaker();
-            });
-          }
-        } else {
-          InCallService().stopRingBack(false);
-          if (_timerStarted == false) {
-            _startTimer();
-            _timerStarted = true;
-          }
-        }
         {
           advanceActions.add(ActionButton(
             title: _audioMuted ? 'unmute' : 'mute',
@@ -523,8 +490,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
               icon: Icons.dialpad,
               onPressed: () => _handleKeyPad(),
             ));
-          }
-          else {
+          } else {
             advanceActions.add(ActionButton(
               title: "switch camera",
               icon: Icons.switch_video,
@@ -532,12 +498,21 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
             ));
           }
 
-          advanceActions.add(ActionButton(
-            title: _speakerOn ? 'speaker' : 'speaker',
-            icon: _speakerOn ? Icons.volume_up : Icons.volume_off,
-            checked: _speakerOn,
-            onPressed: () => _toggleSpeaker(),
-          ));
+          if (voiceonly) {
+            advanceActions.add(ActionButton(
+              title: _speakerOn ? 'speaker off' : 'speaker on',
+              icon: _speakerOn ? Icons.volume_off : Icons.volume_up,
+              checked: _speakerOn,
+              onPressed: () => _toggleSpeaker(),
+            ));
+          } else {
+            advanceActions.add(ActionButton(
+              title: _videoMuted ? "camera on" : 'camera off',
+              icon: _videoMuted ? Icons.videocam : Icons.videocam_off,
+              checked: _videoMuted,
+              onPressed: () => _muteVideo(),
+            ));
+          }
 
           basicActions.add(ActionButton(
             title: _hold ? 'unhold' : 'hold',
@@ -555,14 +530,83 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
               onPressed: () => _handleKeyPad(),
             ));
           } else {
-            basicActions.add( ActionButton(
+            basicActions.add(ActionButton(
               title: "transfer",
               icon: Icons.phone_forwarded,
-              fillColor: Colors.grey,
               onPressed: () => _handleTransfer(),
             ));
           }
         }
+        // if (direction == 'INCOMING') {
+        //   InCallService().stopRingTone();
+        //   /*if (_toggledOnce == false) {
+        //     setState(() {
+        //       _speakerOn = true;
+        //       _toggledOnce = true;
+        //       _toggleSpeaker();
+        //     });
+        //   }*/
+        // } else {
+        //   InCallService().stopRingBack(false);
+        //   if (_timerStarted == false) {
+        //     _startTimer();
+        //     _timerStarted = true;
+        //   }
+        // }
+        // {
+        //   advanceActions.add(ActionButton(
+        //     title: _audioMuted ? 'unmute' : 'mute',
+        //     icon: _audioMuted ? Icons.mic_off : Icons.mic,
+        //     checked: _audioMuted,
+        //     onPressed: () => _muteAudio(),
+        //   ));
+        //
+        //   if (voiceonly) {
+        //     advanceActions.add(ActionButton(
+        //       title: "keypad",
+        //       icon: Icons.dialpad,
+        //       onPressed: () => _handleKeyPad(),
+        //     ));
+        //   }
+        //   else {
+        //     advanceActions.add(ActionButton(
+        //       title: "switch camera",
+        //       icon: Icons.switch_video,
+        //       onPressed: () => _switchCamera(),
+        //     ));
+        //   }
+        //
+        //   advanceActions.add(ActionButton(
+        //     title: _speakerOn ? 'speaker' : 'speaker',
+        //     icon: _speakerOn ? Icons.volume_up : Icons.volume_off,
+        //     checked: _speakerOn,
+        //     onPressed: () => _toggleSpeaker(),
+        //   ));
+        //
+        //   basicActions.add(ActionButton(
+        //     title: _hold ? 'unhold' : 'hold',
+        //     icon: _hold ? Icons.play_arrow : Icons.pause,
+        //     checked: _hold,
+        //     onPressed: () => _handleHold(),
+        //   ));
+        //
+        //   basicActions.add(hangupBtn);
+        //
+        //   if (_showNumPad) {
+        //     basicActions.add(ActionButton(
+        //       title: "back",
+        //       icon: Icons.keyboard_arrow_down,
+        //       onPressed: () => _handleKeyPad(),
+        //     ));
+        //   } else {
+        //     basicActions.add( ActionButton(
+        //       title: "transfer",
+        //       icon: Icons.phone_forwarded,
+        //       fillColor: Colors.grey,
+        //       onPressed: () => _handleTransfer(),
+        //     ));
+        //   }
+        // }
         break;
       case CallStateEnum.FAILED:
       case CallStateEnum.ENDED:
@@ -703,38 +747,38 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
         right: 0,
         child: Center(
             child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Center(
-                child: Padding(
-                    padding: const EdgeInsets.all(6),
-                    child: Text(
-                      (voiceonly
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Center(
+                    child: Padding(
+                        padding: const EdgeInsets.all(6),
+                        child: Text(
+                          (voiceonly
                               ? (_contactName ?? 'VOICE CALL')
                               : 'VIDEO CALL') +
-                          (_hold
-                              ? ' PAUSED BY ${_holdOriginator!.toUpperCase()}'
-                              : ''),
-                      style:
+                              (_hold
+                                  ? ' PAUSED BY ${_holdOriginator!.toUpperCase()}'
+                                  : ''),
+                          style:
                           const TextStyle(fontSize: 24, color: Colors.black54),
-                    ))),
-            Center(
-                child: Padding(
-                    padding: const EdgeInsets.all(6),
-                    child: Text(
-                      '00$remote_identity',
-                      style:
+                        ))),
+                Center(
+                    child: Padding(
+                        padding: const EdgeInsets.all(6),
+                        child: Text(
+                          '00$remote_identity',
+                          style:
                           const TextStyle(fontSize: 18, color: Colors.black54),
-                    ))),
-            Center(
-                child: Padding(
-                    padding: const EdgeInsets.all(6),
-                    child: Text(_timeLabel,
-                        style: const TextStyle(
-                            fontSize: 14, color: Colors.black54)))),
-          ],
-        )),
+                        ))),
+                Center(
+                    child: Padding(
+                        padding: const EdgeInsets.all(6),
+                        child: Text(_timeLabel,
+                            style: const TextStyle(
+                                fontSize: 14, color: Colors.black54)))),
+              ],
+            )),
       ),
     ]);
 
@@ -745,6 +789,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
 
   @override
   Widget build(BuildContext context) {
+    print("direction ==> ${direction}");
     return WillPopScope(
       onWillPop: () async => true,
       child: Scaffold(
