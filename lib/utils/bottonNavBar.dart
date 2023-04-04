@@ -45,7 +45,8 @@ class _BottomNavBarState extends State<BottomNavBar> {
   @override
   void initState() {
     super.initState();
-    checkContactPermission();
+    // checkContactPermission();
+    askPermission();
     checkData();
     // getAllContacts();
     WidgetsFlutterBinding.ensureInitialized();
@@ -63,7 +64,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
           type: AlertType.error,
           title: "NO DATA CONNECTION !",
           desc:
-          "Please connect to Wi-Fi or turn on Mobile Data to use this APP",
+              "Please connect to Wi-Fi or turn on Mobile Data to use this APP",
           buttons: [
             DialogButton(
               onPressed: () {
@@ -85,38 +86,11 @@ class _BottomNavBarState extends State<BottomNavBar> {
     }
   }
 
-
-
-  checkContactPermission() async {
-    PermissionService().hasPermission(Permission.contacts).then((value) async {
-      print('value  per ==> $value');
-
-      if (value == true) {
-        setState(() {
-          allowLoadContacts = true;
-        });
-      } else {
-        await _askContactPermissions().then((value) {
-          print('value ==> $value');
-          if (value == true) {
-            setState(() {
-              allowLoadContacts = true;
-            });
-          } else {
-            setState(() {
-              allowLoadContacts = false;
-            });
-          }
-          // checkContactPermission();
-        });
-      }
-    });
-  }
-
-//############################################################################################################
-  Future<bool> _askContactPermissions() async {
-    Future<bool> val =
-    PermissionService().requestPermissionContacts(onPermissionDenied: () {
+  Future<bool?> askPermission() async {
+    PermissionStatus status = await Permission.contacts.request();
+    if (status.isDenied == true) {
+      askPermission();
+    } else if (status.isPermanentlyDenied == true) {
       Alert(
         context: context,
         type: AlertType.warning,
@@ -127,7 +101,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
           DialogButton(
             onPressed: () async {
               await openAppSettings();
-              Navigator.push(context, MaterialPageRoute(builder: (context) => BottomNavBar(),));
+              // Navigator.push(context, MaterialPageRoute(builder: (context) => BottomNavBar(),));
             },
             gradient: LinearGradient(
               colors: [Colors.grey.shade300, Colors.grey.shade300],
@@ -138,93 +112,96 @@ class _BottomNavBarState extends State<BottomNavBar> {
             ),
           )
         ],
-      ).show();
-      setState(() {});
-    });
-    return Future.value(val);
+      ).show().then((value) => askPermission());
+    } else {
+      setState(() {
+        allowLoadContacts = true;
+      });
+      return true;
+    }
+    return null;
   }
 
   Future<bool> myDialog() async {
     return await showDialog(
-      //show confirm dialogue
-      //the return value will be from "Yes" or "No" options
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          actions: [
-            const Center(
-                child: CircleAvatar(
-                    radius: 80,
-                    backgroundColor: Colors.transparent,
-                    child: Icon(
-                      size: 100,
-                      Icons.error_outline_outlined,
-                      color: Colors.orangeAccent,
-                    ))),
-            const Center(
-                child: Text(
+          //show confirm dialogue
+          //the return value will be from "Yes" or "No" options
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              actions: [
+                const Center(
+                    child: CircleAvatar(
+                        radius: 80,
+                        backgroundColor: Colors.transparent,
+                        child: Icon(
+                          size: 100,
+                          Icons.error_outline_outlined,
+                          color: Colors.orangeAccent,
+                        ))),
+                const Center(
+                    child: Text(
                   "CONFIRMATION",
                   style: TextStyle(fontSize: 22, fontWeight: FontWeight.w400),
                 )),
-            const Center(
-                child: Text(
+                const Center(
+                    child: Text(
                   "REQUIRED !",
                   style: TextStyle(fontSize: 22, fontWeight: FontWeight.w400),
                 )),
-            const Padding(
-              padding: EdgeInsets.fromLTRB(16, 8, 8, 8),
-              child: Center(
-                child: Text("Do you really want to close",
-                    style: TextStyle(fontSize: 16)),
-              ),
-            ),
-            const Padding(
-              padding: EdgeInsets.only(bottom: 16),
-              child: Center(
-                child: Text("this application !",
-                    style: TextStyle(fontSize: 16)),
-              ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Expanded(
-                  child: DialogButton(
-                    onPressed: () {
-                      Navigator.of(context).pop(false);
-                    },
-                    gradient: LinearGradient(
-                      colors: brandColors3,
-                    ),
-                    child: const Text(
-                      "NO",
-                      style: TextStyle(color: Colors.white, fontSize: 20),
-                    ),
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(16, 8, 8, 8),
+                  child: Center(
+                    child: Text("Do you really want to close",
+                        style: TextStyle(fontSize: 16)),
                   ),
                 ),
-                Expanded(
-                  child: DialogButton(
-                    onPressed: () {
-                      Navigator.of(context).pop(true);
-                    },
-                    gradient: LinearGradient(
-                      colors: brandColors3,
-                    ),
-                    child: const Text(
-                      "YES",
-                      style: TextStyle(color: Colors.white, fontSize: 20),
-                    ),
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 16),
+                  child: Center(
+                    child: Text("this application !",
+                        style: TextStyle(fontSize: 16)),
                   ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Expanded(
+                      child: DialogButton(
+                        onPressed: () {
+                          Navigator.of(context).pop(false);
+                        },
+                        gradient: LinearGradient(
+                          colors: brandColors3,
+                        ),
+                        child: const Text(
+                          "NO",
+                          style: TextStyle(color: Colors.white, fontSize: 20),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: DialogButton(
+                        onPressed: () {
+                          Navigator.of(context).pop(true);
+                        },
+                        gradient: LinearGradient(
+                          colors: brandColors3,
+                        ),
+                        child: const Text(
+                          "YES",
+                          style: TextStyle(color: Colors.white, fontSize: 20),
+                        ),
+                      ),
+                    )
+                  ],
                 )
               ],
-            )
-          ],
-        );
-      },
-    ) ??
+            );
+          },
+        ) ??
         false; //if showDialouge had returned null, then return false
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -343,11 +320,11 @@ class _BottomNavBarState extends State<BottomNavBar> {
               ),
               Expanded(
                   child: Text(
-                    name,
-                    style: const TextStyle(color: Colors.white),
-                    overflow: TextOverflow.clip,
-                    maxLines: 1,
-                  ))
+                name,
+                style: const TextStyle(color: Colors.white),
+                overflow: TextOverflow.clip,
+                maxLines: 1,
+              ))
             ],
           ),
         ),

@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
+import '../../utils/bottonNavBar.dart';
 import '../../utils/settings.dart';
 
 class Access extends StatefulWidget {
   static String tag = 'about-page';
+
   @override
   AccessPage createState() => AccessPage();
 }
@@ -26,6 +28,11 @@ class AccessPage extends State<Access> {
         DialogButton(
           onPressed: () {
             openAppSettings();
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => BottomNavBar(),
+                ));
           },
           gradient: LinearGradient(
             colors: brandColors3,
@@ -59,7 +66,7 @@ class AccessPage extends State<Access> {
       appBar: AppBar(
         title: const Text('Access Required'),
         flexibleSpace: Container(
-          decoration:  BoxDecoration(
+          decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.centerLeft,
               end: Alignment.centerRight,
@@ -86,8 +93,8 @@ class AccessPage extends State<Access> {
                         end: Alignment.centerRight,
                         colors: brandColors,
                       ),
-                      borderRadius:
-                          const BorderRadius.only(bottomLeft: Radius.circular(90))),
+                      borderRadius: const BorderRadius.only(
+                          bottomLeft: Radius.circular(90))),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
@@ -99,16 +106,14 @@ class AccessPage extends State<Access> {
                             child: SizedBox(
                               height: 150,
                               width: 300,
-                              child: Image.asset(
-                                  'lib/assets/images/logo.png'),
+                              child: Image.asset('lib/assets/images/logo.png'),
                             )),
                       ),
                       const Spacer(),
                       const Align(
                         alignment: Alignment.bottomRight,
                         child: Padding(
-                          padding:
-                              EdgeInsets.only(bottom: 3, right: 32),
+                          padding: EdgeInsets.only(bottom: 3, right: 32),
                           child: Text(
                             '',
                             style: TextStyle(
@@ -122,7 +127,6 @@ class AccessPage extends State<Access> {
                   ),
                   //),
                 ),
-
                 Container(
                   height: MediaQuery.of(context).size.height / 2,
                   width: MediaQuery.of(context).size.width,
@@ -138,14 +142,13 @@ class AccessPage extends State<Access> {
                           ),
                         ),
                       ),
-
                       Padding(
                         padding: const EdgeInsets.fromLTRB(0, 100, 0, 0),
                         child: InkWell(
                           onTap: () async {
                             myDialog();
                           },
-                          child:  Container(
+                          child: Container(
                             height: 40,
                             width: MediaQuery.of(context).size.width / 1.2,
                             decoration: BoxDecoration(
@@ -154,8 +157,8 @@ class AccessPage extends State<Access> {
                                   end: Alignment.centerRight,
                                   colors: brandColors,
                                 ),
-                                borderRadius:
-                                    const BorderRadius.all(Radius.circular(50))),
+                                borderRadius: const BorderRadius.all(
+                                    Radius.circular(50))),
                             child: const Center(
                               child: Text(
                                   "Tap Here to Grant CONTACT PERMISIONS",
@@ -169,7 +172,6 @@ class AccessPage extends State<Access> {
                     ],
                   ),
                 ),
-
               ],
             ),
           )),
