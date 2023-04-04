@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:provider/provider.dart';
@@ -11,7 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import '../utils/AuthService.dart';
-import '../utils/settings1.dart';
+import '../utils/settings.dart';
 
 class MenuScreen extends StatefulWidget {
   const MenuScreen({Key? key}) : super(key: key);
@@ -28,7 +29,6 @@ class _MenuScreenState extends State<MenuScreen> {
     return Scaffold(
       backgroundColor: appcolor.dialmainbackground,
       appBar: AppBar(
-        automaticallyImplyLeading: false,
         title: const Text(
           'Menu',
           style: TextStyle(fontSize: 24, color: Colors.white),
@@ -50,9 +50,7 @@ class _MenuScreenState extends State<MenuScreen> {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          const SizedBox(
-            height: 20,
-          ),
+          const SizedBox(height: 20,),
           ListTile(
             leading: const Icon(Icons.share, color: Colors.blue),
             title: const Text(
@@ -64,10 +62,7 @@ class _MenuScreenState extends State<MenuScreen> {
                   "Call cheap to Africa, Almost as if IT'S FREE. Download our free APP at: http://onelink.to/wg4zbg");
             },
           ),
-          const Divider(
-            height: 2,
-            color: Colors.blue,
-          ),
+          const Divider(height: 2, color: Colors.blue,),
           ListTile(
             leading: const Icon(FontAwesomeIcons.whatsapp, color: Colors.green),
             title: const Text("Whatsapp Us", style: TextStyle(fontSize: 17)),
@@ -87,10 +82,7 @@ class _MenuScreenState extends State<MenuScreen> {
               }
             },
           ),
-          const Divider(
-            height: 2,
-            color: Colors.blue,
-          ),
+          const Divider(height: 2, color: Colors.blue,),
           ListTile(
             leading: const Icon(Icons.email, color: Colors.blue),
             title: const Text("Email Us", style: TextStyle(fontSize: 17)),
@@ -102,10 +94,7 @@ class _MenuScreenState extends State<MenuScreen> {
                   ("My Account Number is: $sipUsername. My Name is: $sipUsername. My Cell Number is: +$countryCode$cellNumber. Find my message below :"));
             },
           ),
-          const Divider(
-            height: 2,
-            color: Colors.blue,
-          ),
+          const Divider(height: 2, color: Colors.blue,),
           ListTile(
             leading: const Icon(Icons.call, color: Colors.blue),
             title: const Text("Call Us", style: TextStyle(fontSize: 17)),
@@ -113,26 +102,21 @@ class _MenuScreenState extends State<MenuScreen> {
               _launchCaller(supportNumber);
             },
           ),
-          const Divider(
-            height: 2,
-            color: Colors.blue,
-          ),
+          const Divider(height: 2, color: Colors.blue,),
           ListTile(
             leading: const Icon(Icons.flag, color: Colors.blue),
             title: const Text("Privacy Policy", style: TextStyle(fontSize: 17)),
             onTap: () {
-              Navigator.pushNamed(context, '/TsCs');
+              // BuildContext context;
+              Navigator.pushNamed(context, '/TsCs'); //'/TsCs'
             },
           ),
-          const Divider(
-            height: 2,
-            color: Colors.blue,
-          ),
+          const Divider(height: 2, color: Colors.blue,),
           const Align(
             alignment: FractionalOffset.bottomLeft,
             child: ListTile(
               title: Text(
-                "Version 1.0",
+                "Version 4(1.0.0)",
                 style: TextStyle(
                   color: Colors.blue,
                   fontSize: 12,
@@ -149,17 +133,20 @@ class _MenuScreenState extends State<MenuScreen> {
                   Align(
                     alignment: FractionalOffset.bottomCenter,
                     child: ListTile(
-                      leading: const Icon(FontAwesomeIcons.rightFromBracket,
-                          color: Colors.red),
-                      title:
-                          const Text("Log Out", style: TextStyle(fontSize: 17)),
+                      leading:
+                      const Icon(
+                          FontAwesomeIcons.signOutAlt, color: Colors.red),
+                      title: const Text(
+                          "Log Out", style: TextStyle(fontSize: 17)),
                       onTap: () {
                         showDialog(
+                          //show confirm dialogue
+                          //the return value will be from "Yes" or "No" options
                           context: context,
-                          builder: (BuildContext context) {
+                          builder: (context) {
                             return AlertDialog(
-                              actions: <Widget>[
-                                Center(
+                              actions: [
+                                const Center(
                                     child: CircleAvatar(
                                         radius: 80,
                                         backgroundColor: Colors.transparent,
@@ -168,82 +155,71 @@ class _MenuScreenState extends State<MenuScreen> {
                                           Icons.error_outline_outlined,
                                           color: Colors.orangeAccent,
                                         ))),
-                                Center(
-                                    child: Text("Exit!",
-                                        style: TextStyle(
-                                            fontSize: 22,
-                                            fontWeight: FontWeight.bold))),
-                                SizedBox(
-                                  height: 10,
-                                ),
-                                Center(
+                                const Center(
                                     child: Text(
-                                        "Do you really want to close \n this application !",
-                                        style: TextStyle(fontSize: 18))),
-                                SizedBox(
-                                  height: 15,
+                                      "CONFIRMATION",
+                                      style: TextStyle(fontSize: 22,
+                                          fontWeight: FontWeight.w400),
+                                    )),
+                                const Center(
+                                    child: Text(
+                                      "REQUIRED !",
+                                      style: TextStyle(fontSize: 22,
+                                          fontWeight: FontWeight.w400),
+                                    )),
+                                const Padding(
+                                  padding: EdgeInsets.fromLTRB(16, 8, 8, 8),
+                                  child: Center(
+                                    child: Text("Do you really want to close",
+                                        style: TextStyle(fontSize: 16)),
+                                  ),
+                                ),
+                                const Padding(
+                                  padding: EdgeInsets.only(bottom: 16),
+                                  child: Center(
+                                    child: Text("this application !",
+                                        style: TextStyle(fontSize: 16)),
+                                  ),
                                 ),
                                 Row(
+                                  mainAxisAlignment: MainAxisAlignment
+                                      .spaceEvenly,
                                   children: [
-                                    const SizedBox(
-                                      width: 30,
-                                    ),
-                                    InkWell(
-                                      onTap: () {
-                                        Navigator.pop(context);
-                                      },
-                                      child: Container(
-                                        alignment: Alignment.center,
-                                        height: 40,
-                                        width: 80,
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                          gradient: LinearGradient(
-                                            begin: Alignment.centerLeft,
-                                            end: Alignment.centerRight,
-                                            colors: brandColors3,
-                                          ),
+                                    Expanded(
+                                      child: DialogButton(
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                        },
+                                        gradient: LinearGradient(
+                                          colors: brandColors3,
                                         ),
                                         child: const Text(
-                                          "No",
-                                          style: TextStyle(color: Colors.white),
+                                          "NO",
+                                          style: TextStyle(color: Colors.white,
+                                              fontSize: 20),
                                         ),
                                       ),
                                     ),
-                                    const SizedBox(
-                                      width: 35,
-                                    ),
-                                    InkWell(
-                                      onTap: () async {
-                                        _cacheClearDetails();
-                                        // BuildContext context;
-                                        await Provider.of<AuthService>(context,
-                                                listen: false)
-                                            .logout();
-                                        SystemNavigator.pop();
-                                      },
-                                      child: Container(
-                                        alignment: Alignment.center,
-                                        height: 40,
-                                        width: 80,
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                          gradient: LinearGradient(
-                                            begin: Alignment.centerLeft,
-                                            end: Alignment.centerRight,
-                                            colors: brandColors3,
-                                          ),
+                                    Expanded(
+                                      child: DialogButton(
+                                        onPressed: () async {
+                                          _cacheClearDetails();
+                                          await Provider.of<AuthService>(
+                                              context, listen: false).logout();
+                                          SystemNavigator.pop();
+                                        },
+                                        gradient: LinearGradient(
+                                          colors: brandColors3,
                                         ),
                                         child: const Text(
-                                          "Yes",
-                                          style: TextStyle(color: Colors.white),
+                                          "YES",
+                                          style: TextStyle(color: Colors.white,
+                                              fontSize: 20),
                                         ),
                                       ),
-                                    ),
+                                    )
                                   ],
-                                ),
+                                )
                               ],
                             );
                           },
@@ -259,9 +235,10 @@ class _MenuScreenState extends State<MenuScreen> {
   }
 }
 
+
 _launchEmailer(String email, String mailSubject, String mailBody) async {
   String url =
-      Uri.encodeFull("mailto:$email?subject=$mailSubject&body=$mailBody");
+  Uri.encodeFull("mailto:$email?subject=$mailSubject&body=$mailBody");
   if (await launchUrlString(url)) {
     await launchUrlString(url);
     ;

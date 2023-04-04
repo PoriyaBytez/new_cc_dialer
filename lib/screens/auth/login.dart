@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:country_picker/country_picker.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:flutter/material.dart';
@@ -50,7 +52,7 @@ class _LoginPageState extends State<LoginPage> {
           type: AlertType.error,
           title: "NO DATA CONNECTION !",
           desc:
-              "Please connect to Wi-Fi or turn on Mobile Data to use this APP",
+          "Please connect to Wi-Fi or turn on Mobile Data to use this APP",
           buttons: [
             DialogButton(
               onPressed: () {
@@ -88,7 +90,7 @@ class _LoginPageState extends State<LoginPage> {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           duration: Duration(seconds: 5),
           content:
-              Text('return "Mobile number must be more than 5 digits !"')));
+          Text('return "Mobile number must be more than 5 digits !"')));
       return null;
     } else if (value.length > 14) {
       _autoValidateAuth = false;
@@ -149,6 +151,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    double kBoardHeight = MediaQuery.of(context).viewInsets.bottom;
     return Form(
         key: _formKey,
         child: Scaffold(
@@ -251,16 +254,16 @@ class _LoginPageState extends State<LoginPage> {
                             top: 4, left: 16, right: 16, bottom: 4),
                         decoration: const BoxDecoration(
                             borderRadius:
-                                BorderRadius.all(Radius.circular(15)),
+                            BorderRadius.all(Radius.circular(15)),
                             color: appcolor.textbackground,
                             boxShadow: [
                               BoxShadow(color: Colors.white, blurRadius: 4)
                             ]),
-                        child: TextFormField(
+                        child: TextFormField(scrollPadding: EdgeInsets.only(bottom: kBoardHeight),
                           validator: validateMobile,
                           keyboardType: TextInputType.number,
                           onSaved: (value) =>
-                              _number = value!.trim(), // <= NEW
+                          _number = value!.trim(), // <= NEW
                           decoration: InputDecoration(
                               border: InputBorder.none,
                               icon: const Icon(
@@ -270,7 +273,7 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                               hintText: 'eg.7794500997',
                               hintStyle:
-                                  TextStyle(color: Colors.grey.shade400)),
+                              TextStyle(color: Colors.grey.shade400)),
                         ),
                       ),
                       const Spacer(),
@@ -281,7 +284,7 @@ class _LoginPageState extends State<LoginPage> {
                           form!.save();
                           // Validate will return true if is valid, or false if invalid.
                           if (form.validate() &
-                              (_autoValidateAuth == true)) {
+                          (_autoValidateAuth == true)) {
                             userCountryCode = _cCode;
                             userCountryName = _cName!;
                             userCellNumber = _number!;

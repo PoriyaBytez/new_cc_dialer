@@ -29,7 +29,7 @@ class _HomePageState extends State<HomePage> {
   bool searching = false;
   bool isloading = false;
   final TextEditingController _cSearch = TextEditingController();
-
+  List<Contact> contacts = [];
   List<Contact> searchContacts = [];
   Offset? _tapPosition;
 
@@ -45,6 +45,17 @@ class _HomePageState extends State<HomePage> {
 
   void _onTapDown(TapDownDetails details) {
     _tapPosition = details.globalPosition;
+  }
+
+  getAllContacts() async {
+    contacts = await FlutterContacts.getContacts(
+        withPhoto: false, withProperties: true);
+    FlutterContacts.config.includeNotesOnIos13AndAbove = true;
+    print("contacts page ${contacts.length}");
+    if(!mounted){
+      return;
+    }
+    setState(() {});
   }
 
   @override
@@ -116,7 +127,6 @@ class _HomePageState extends State<HomePage> {
                     });
                   },
                 ),
-
                 IconButton(
                     icon: const Icon(
                       Icons.refresh,
@@ -130,7 +140,7 @@ class _HomePageState extends State<HomePage> {
                     })
               ],
             )),
-        body: isloading
+        body: contacts.isEmpty
             ? Center(
             child: SizedBox(
               width: 200,
@@ -146,13 +156,10 @@ class _HomePageState extends State<HomePage> {
                 center: const Text("Loading..."),
               ),
             ))
-            : contacts.isEmpty
-            ? Center(child: Text("No Data Found"))
             : CupertinoScrollbar(
           thickness: 6,
           thicknessWhileDragging: 9,
-          child: searchContacts.length != 0 ||
-              _cSearch.text.isNotEmpty
+          child: searchContacts.length != 0 || _cSearch.text.isNotEmpty
               ? ListView.builder(
             itemCount: searchContacts.length,
             itemBuilder: (BuildContext context, index) {
@@ -165,8 +172,7 @@ class _HomePageState extends State<HomePage> {
                     items: [
                       PopupMenuItem(
                         child: TextButton(
-                          child:
-                          Column(children: const <Widget>[
+                          child: Column(children: const <Widget>[
                             Icon(Icons.phone),
                             Text(
                               "Call",
@@ -177,9 +183,7 @@ class _HomePageState extends State<HomePage> {
                             // bloc.setContact(item);
                             String? phoneNumber =
                             (c.phones.length != 0)
-                                ? c.phones
-                                .elementAt(0)
-                                .number
+                                ? c.phones.elementAt(0).number
                                 : '  ';
                             if (!mounted) return;
                             dest = phoneNumber
@@ -214,8 +218,7 @@ class _HomePageState extends State<HomePage> {
                       child: Text(
                         "${c.displayName.substring(0, 1).toUpperCase()}",
                         style: const TextStyle(
-                            fontSize: 26,
-                            color: Colors.white60),
+                            fontSize: 26, color: Colors.white60),
                       ),
                     ),
                     title: Text(
@@ -251,8 +254,7 @@ class _HomePageState extends State<HomePage> {
                     items: [
                       PopupMenuItem(
                         child: TextButton(
-                          child:
-                          Column(children: const <Widget>[
+                          child: Column(children: const <Widget>[
                             Icon(Icons.phone),
                             Text(
                               "Call",
@@ -263,9 +265,7 @@ class _HomePageState extends State<HomePage> {
                             // bloc.setContact(item);
                             String? phoneNumber =
                             (c.phones.length != 0)
-                                ? c.phones
-                                .elementAt(0)
-                                .number
+                                ? c.phones.elementAt(0).number
                                 : '  ';
                             if (!mounted) return;
                             dest = phoneNumber
@@ -300,8 +300,7 @@ class _HomePageState extends State<HomePage> {
                       child: Text(
                         "${c.displayName.substring(0, 1).toUpperCase()}",
                         style: const TextStyle(
-                            fontSize: 26,
-                            color: Colors.white60),
+                            fontSize: 26, color: Colors.white60),
                       ),
                     ),
                     title: Text(
@@ -338,7 +337,8 @@ class _HomePageState extends State<HomePage> {
       return;
     }
     contacts.forEach((userDetail) {
-      if (userDetail.displayName.toLowerCase().contains(text.toLowerCase()) || userDetail.displayName.toUpperCase().contains(text.toUpperCase()))
+      if (userDetail.displayName.toLowerCase().contains(text.toLowerCase()) ||
+          userDetail.displayName.toUpperCase().contains(text.toUpperCase()))
         searchContacts.add(userDetail);
     });
 

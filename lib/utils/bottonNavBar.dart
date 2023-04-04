@@ -159,73 +159,82 @@ class _BottomNavBarState extends State<BottomNavBar> {
 
   Future<bool> myDialog() async {
     return await showDialog(
-          //show confirm dialogue
-          //the return value will be from "Yes" or "No" options
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              actions: [
-                Center(
-                    child: CircleAvatar(
-                        radius: 80,
-                        backgroundColor: Colors.transparent,
-                        child: Icon(
-                          size: 100,
-                          Icons.error_outline_outlined,
-                          color: Colors.orangeAccent,
-                        ))),
-                Center(
-                    child: Text(
+      //show confirm dialogue
+      //the return value will be from "Yes" or "No" options
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          actions: [
+            const Center(
+                child: CircleAvatar(
+                    radius: 80,
+                    backgroundColor: Colors.transparent,
+                    child: Icon(
+                      size: 100,
+                      Icons.error_outline_outlined,
+                      color: Colors.orangeAccent,
+                    ))),
+            const Center(
+                child: Text(
                   "CONFIRMATION",
                   style: TextStyle(fontSize: 22, fontWeight: FontWeight.w400),
                 )),
-                Center(
-                    child: Text(
+            const Center(
+                child: Text(
                   "REQUIRED !",
                   style: TextStyle(fontSize: 22, fontWeight: FontWeight.w400),
                 )),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
-                  child: Text("Do you really want to close this application !",
-                      style: TextStyle(fontSize: 16)),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Expanded(
-                      child: DialogButton(
-                        onPressed: () {
-                          Navigator.of(context).pop(false);
-                        },
-                        gradient: LinearGradient(
-                          colors: brandColors3,
-                        ),
-                        child: const Text(
-                          "NO",
-                          style: TextStyle(color: Colors.white, fontSize: 20),
-                        ),
-                      ),
+            const Padding(
+              padding: EdgeInsets.fromLTRB(16, 8, 8, 8),
+              child: Center(
+                child: Text("Do you really want to close",
+                    style: TextStyle(fontSize: 16)),
+              ),
+            ),
+            const Padding(
+              padding: EdgeInsets.only(bottom: 16),
+              child: Center(
+                child: Text("this application !",
+                    style: TextStyle(fontSize: 16)),
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Expanded(
+                  child: DialogButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(false);
+                    },
+                    gradient: LinearGradient(
+                      colors: brandColors3,
                     ),
-                    Expanded(
-                      child: DialogButton(
-                        onPressed: () {
-                          Navigator.of(context).pop(true);
-                        },
-                        gradient: LinearGradient(
-                          colors: brandColors3,
-                        ),
-                        child: const Text(
-                          "YES",
-                          style: TextStyle(color: Colors.white, fontSize: 20),
-                        ),
-                      ),
-                    )
-                  ],
+                    child: const Text(
+                      "NO",
+                      style: TextStyle(color: Colors.white, fontSize: 20),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: DialogButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(true);
+                    },
+                    gradient: LinearGradient(
+                      colors: brandColors3,
+                    ),
+                    child: const Text(
+                      "YES",
+                      style: TextStyle(color: Colors.white, fontSize: 20),
+                    ),
+                  ),
                 )
               ],
-            );
-          },
-        ) ??
+            )
+          ],
+        );
+      },
+    ) ??
         false; //if showDialouge had returned null, then return false
   }
 
