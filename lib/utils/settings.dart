@@ -31,7 +31,7 @@ List<Color> brandColors = [Colors.black, Colors.black];
 List<Color> brandColors1 = [Colors.black, Colors.black];
 
 // Permsission Vars
-List<Contact> contactsCallScreen = [];
+List<Contact> contactsCallScreen  = [];
 bool allowLoadContacts = false;
 bool allowLoadDialer = true;
 bool allowBluetooth = false;
@@ -95,7 +95,8 @@ class appcolor {
   static const Color dialmainbackground = Color(0xfff0f8ff);
 }
 getAllContacts() async {
-  contactsCallScreen = await FlutterContacts.getContacts(withPhoto: false, withProperties: true);
+  contactsCallScreen  = await FlutterContacts.getContacts(withPhoto: false, withProperties: true);
   FlutterContacts.config.includeNotesOnIos13AndAbove = true;
   print("contacts bottom ${contactsCallScreen.length}");
+
 }
