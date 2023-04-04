@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sip_ua/sip_ua.dart';
 
 import '../../main.dart';
 import '../../utils/settings.dart';
@@ -21,7 +22,7 @@ class AppWidget extends StatelessWidget {
     final routes = <String, WidgetBuilder>{
       HomePage.tag: (context) => MyMainApp(),
       '/register': (context) => RegisterWidget(helper),
-      '/callscreen': (context) => CallScreenWidget(helper),
+      '/callscreen': (context) => CallScreenWidget(helper,arguments as Call?),
       '/dialpad': (context) => DialPadWidget(helper),
       '/about': (context) => AboutWidget(),
       '/TsCs': (context) => TsCs(),

@@ -213,6 +213,8 @@ class _SignUpPageState extends State<SignUpPage> {
 
   @override
   Widget build(BuildContext context) {
+    double kBoardHeight = MediaQuery.of(context).viewInsets.bottom;
+
     return Form(
       key: _formKey,
       child: Scaffold(
@@ -331,7 +333,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           boxShadow: [
                             BoxShadow(color: Colors.white, blurRadius: 4)
                           ]),
-                      child: TextFormField(
+                      child: TextFormField(scrollPadding: EdgeInsets.only(bottom: kBoardHeight),
                         keyboardType: TextInputType.number,
                         validator: validateMobile,
                         onSaved: (value) => _number = value!.trim(), // <= NEW
@@ -358,7 +360,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           boxShadow: [
                             BoxShadow(color: Colors.white, blurRadius: 4)
                           ]),
-                      child: TextFormField(
+                      child: TextFormField(scrollPadding: EdgeInsets.only(bottom: kBoardHeight),
                         keyboardType: TextInputType.text,
                         validator: validateName,
                         onSaved: (value) => _fullname = value!.trim(),
@@ -385,7 +387,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           boxShadow: [
                             BoxShadow(color: Colors.white, blurRadius: 4)
                           ]),
-                      child: TextFormField(
+                      child: TextFormField(scrollPadding: EdgeInsets.only(bottom: kBoardHeight),
                         keyboardType: TextInputType.emailAddress,
                         //TextInputType.emailAddress
                         validator: validateEmail,

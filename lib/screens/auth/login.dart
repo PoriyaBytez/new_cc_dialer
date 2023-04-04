@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:country_picker/country_picker.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:flutter/material.dart';
@@ -149,6 +151,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    double kBoardHeight = MediaQuery.of(context).viewInsets.bottom;
     return Form(
         key: _formKey,
         child: Scaffold(
@@ -256,7 +259,7 @@ class _LoginPageState extends State<LoginPage> {
                             boxShadow: [
                               BoxShadow(color: Colors.white, blurRadius: 4)
                             ]),
-                        child: TextFormField(
+                        child: TextFormField(scrollPadding: EdgeInsets.only(bottom: kBoardHeight),
                           validator: validateMobile,
                           keyboardType: TextInputType.number,
                           onSaved: (value) =>

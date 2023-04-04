@@ -14,6 +14,8 @@
     <uses-permission android:name="android.hardware.sensor.proximity"/>
     <uses-permission android:name="android.permission.BODY_SENSORS_BACKGROUND"/>
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
         android:label="Molweni"
@@ -41,6 +43,9 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <receiver android:name="${applicationName}"
+            android:enabled="true"
+            android:exported="false"/>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data
