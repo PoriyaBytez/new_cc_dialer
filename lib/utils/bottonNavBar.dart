@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:flutter/material.dart';
@@ -157,10 +158,8 @@ class _BottomNavBarState extends State<BottomNavBar> {
     return Future.value(val);
   }
 
-  Future<bool> myDialog() async {
-    return await showDialog(
-          //show confirm dialogue
-          //the return value will be from "Yes" or "No" options
+   myDialog(context) {
+    return  showDialog(
           context: context,
           builder: (context) {
             return AlertDialog(
@@ -210,6 +209,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
                       child: DialogButton(
                         onPressed: () {
                           Navigator.of(context).pop(true);
+                          exit(0);
                         },
                         gradient: LinearGradient(
                           colors: brandColors3,
@@ -225,8 +225,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
               ],
             );
           },
-        ) ??
-        false; //if showDialouge had returned null, then return false
+        ); //if showDialouge had returned null, then return false
   }
 
   @override
@@ -240,8 +239,12 @@ class _BottomNavBarState extends State<BottomNavBar> {
     ];
 
     return WillPopScope(
-        onWillPop: myDialog,
+        onWillPop: () => myDialog(context),
         child: Scaffold(
+          // appBar: AppBar(title: Text("Text"),leading: InkWell(
+          //     onTap: (){
+          //       myDialog();
+          //     },child: Icon(Icons.arrow_back)),),
           backgroundColor: appcolor.dialmainbackground,
           key: _scaffoldKey,
           body: _children[pageIndex], //_children(pageIndex),

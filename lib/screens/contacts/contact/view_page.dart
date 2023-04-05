@@ -215,7 +215,7 @@ class _ViewPageState extends State<ViewPage> {
     );
   }
 
-  // void whatsAppOpen(phoneNumber, message) async {
-  //   await FlutterOpenWhatsapp.sendSingleMessage(phoneNumber, message);
-  // }
+// void whatsAppOpen(phoneNumber, message) async {
+//   await FlutterOpenWhatsapp.sendSingleMessage(phoneNumber, message);
+// }
 }

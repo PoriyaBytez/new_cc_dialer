@@ -28,7 +28,7 @@ class _MenuScreenState extends State<MenuScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: appcolor.dialmainbackground,
-      appBar: AppBar(
+      appBar: AppBar(automaticallyImplyLeading: false,
         title: const Text(
           'Menu',
           style: TextStyle(fontSize: 24, color: Colors.white),
@@ -70,15 +70,16 @@ class _MenuScreenState extends State<MenuScreen> {
               _preferences = await SharedPreferences.getInstance();
               String? countryCode = _preferences!.getString('countryCode');
               String? cellNumber = _preferences!.getString('countryCellNumber');
-              var whatsAppUrlAndroid =
-                  "whatsapp://send?phone=$supportWhatsappNumber"
-                  "&text=${Uri.encodeComponent("My Account Number is: $sipUsername. My Name is: $accountUsername. My Cell Number is: +$countryCode$cellNumber  . Find my message below :")}";
-              var whatsAppUralIos =
-                  "https://wa.me/$supportWhatsappNumber?text=${Uri.encodeComponent("My Account Number is: $sipUsername. My Name is: $accountUsername. My Cell Number is: +$countryCode$cellNumber  . Find my message below :")}";
+
               if (Platform.isIOS) {
-                launchUrlString(whatsAppUralIos);
+                var whatsAppUralIos =
+                    "https://wa.me/$supportiOSWhatsappNumber?text=${Uri.encodeComponent("My Account Number is: $sipUsername. My Name is: $accountUsername. My Cell Number is: +$countryCode$cellNumber  . Find my message below :")}";
+                launchUrlString(whatsAppUralIos,mode: LaunchMode.externalApplication,);
               } else {
-                launchUrlString(whatsAppUrlAndroid);
+                var whatsAppUrlAndroid =
+                    "whatsapp://send?phone=$supportWhatsappNumber"
+                    "&text=${Uri.encodeComponent("My Account Number is: $sipUsername. My Name is: $accountUsername. My Cell Number is: +$countryCode$cellNumber  . Find my message below :")}";
+                launchUrlString(whatsAppUrlAndroid,mode: LaunchMode.externalApplication);
               }
             },
           ),
@@ -135,7 +136,7 @@ class _MenuScreenState extends State<MenuScreen> {
                     child: ListTile(
                       leading:
                       const Icon(
-                          FontAwesomeIcons.signOutAlt, color: Colors.red),
+                          FontAwesomeIcons.rightFromBracket, color: Colors.red),
                       title: const Text(
                           "Log Out", style: TextStyle(fontSize: 17)),
                       onTap: () {
@@ -206,7 +207,8 @@ class _MenuScreenState extends State<MenuScreen> {
                                           _cacheClearDetails();
                                           await Provider.of<AuthService>(
                                               context, listen: false).logout();
-                                          SystemNavigator.pop();
+                                          Navigator.of(context).pop(true);
+                                          exit(0);
                                         },
                                         gradient: LinearGradient(
                                           colors: brandColors3,
@@ -249,7 +251,7 @@ _launchEmailer(String email, String mailSubject, String mailBody) async {
 }
 
 _launchCaller(String number) async {
-  String url = "tel:$number";
+  String url = Platform.isIOS ? "tel://+$supportiOSWhatsappNumber" : "tel:$number";
   if (await launchUrlString(url)) {
     await launchUrlString(url);
   } else {
