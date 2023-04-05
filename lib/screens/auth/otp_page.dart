@@ -3,18 +3,14 @@ import 'dart:convert';
 import 'package:flutter_countdown_timer/countdown_timer_controller.dart';
 import 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
 import 'package:flutter/material.dart';
-import 'package:otp_text_field/otp_field.dart';
-import 'package:otp_text_field/style.dart';
+import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 import 'package:provider/provider.dart';
 import 'package:requests/requests.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sms_otp_auto_verify/sms_otp_auto_verify.dart';
-
 import '../../utils/AuthService.dart';
 import '../../utils/bottonNavBar.dart';
 import '../../utils/settings.dart';
-// import 'package:otp_text_field/otp_text_field.dart';
 
 class OtpPage extends StatefulWidget {
   @override
@@ -44,6 +40,7 @@ class _OtpPageState extends State<OtpPage> {
   int _countDown = 120;
   CountdownTimerController? controller;
   int _otpTimeInMS = 1000 * otpStartMinutes * 60;
+  bool keyBoardPadding = false;
 
   // String? _appSignature;
   final _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -57,10 +54,9 @@ class _OtpPageState extends State<OtpPage> {
     super.initState();
   }
 
-
 //##################################################################################################################################
 
-  void _timerstart(){
+  void _timerstart() {
     if (_counter <= 5) {
       _apiChooser(otpAction);
       _countDown = 120;
@@ -72,11 +68,11 @@ class _OtpPageState extends State<OtpPage> {
     }
   }
 
-   _startCountDown() {
+  _startCountDown() {
     countdownTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (_countDown > 0) {
         _countDown--;
-      }else {
+      } else {
         if (_otpWasUsed == false) {
           if (!mounted) return;
           _counter++;
@@ -101,7 +97,6 @@ class _OtpPageState extends State<OtpPage> {
         _otpWasUsed = true;
         btnText = 'manual otp used';
         _verifyOtp(_otpCode);
-
       } else {
         _otpWasUsed = false;
         btnText = 'Retrying in: ';
@@ -219,7 +214,7 @@ class _OtpPageState extends State<OtpPage> {
             sipCallerID!.trim(),
             authAction!.trim());
 
-        await Provider.of<AuthService>(context,listen: false)
+        await Provider.of<AuthService>(context, listen: false)
             .loginUser(authAction!);
         setState(() {
           Navigator.pushNamedAndRemoveUntil(
@@ -254,19 +249,20 @@ class _OtpPageState extends State<OtpPage> {
         timeoutSeconds: 3000);
     print("response==> ${result.body}");
     if (result.success) {
-
       if ((json.decode(result.content()).containsKey("action"))) {
         var _routeAction = (json.decode(result.content())['action']).toString();
         if (_routeAction == 'LogIN') {
           var _message =
               " The Mobile Number or Email provided already exists, Please try Log-In instead";
           myDialog(_message, '/Login');
-        }else{
+        } else {
           print('sinup result else==> ${result.body} ');
 
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
-            return BottomNavBar();
-          },));
+          Navigator.pushReplacement(context, MaterialPageRoute(
+            builder: (context) {
+              return BottomNavBar();
+            },
+          ));
         }
       }
     }
@@ -284,7 +280,6 @@ class _OtpPageState extends State<OtpPage> {
           "country_code": _ccode,
           "phone_number": _cellNum
         },
-
         bodyEncoding: RequestBodyEncoding.JSON,
         timeoutSeconds: 3000);
 
@@ -298,9 +293,11 @@ class _OtpPageState extends State<OtpPage> {
               "The Mobile Number provided does not exists, Please create an Account";
           myDialog(_message, '/SignUp');
         } else {
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
-            return BottomNavBar();
-          },));
+          Navigator.pushReplacement(context, MaterialPageRoute(
+            builder: (context) {
+              return BottomNavBar();
+            },
+          ));
         }
       }
     }
@@ -327,6 +324,7 @@ class _OtpPageState extends State<OtpPage> {
 
   @override
   Widget build(BuildContext context) {
+    double keyBoardHeight = MediaQuery.of(context).viewInsets.bottom;
     return Form(
         key: _formKey,
         child: Scaffold(
@@ -408,38 +406,19 @@ class _OtpPageState extends State<OtpPage> {
                           ),
                         ),
                       ),
-                      TextFieldPin(
-                        textController: t1,
-                        codeLength: otpCodeLength,
-                        defaultBoxSize: 48,
-                        textStyle: const TextStyle(
-                            fontSize: 16, color: appcolor.black),
-                        autoFocus: true,
-                        selectedDecoration: BoxDecoration(
-                            // borderSide: BorderSide.none,
-                            borderRadius: BorderRadius.circular(10)),
-                        onChange: (code) {
-                          Provider.of<AuthService>(context, listen: false);
-                          _onOtpCallBack(code, false);
+                      OtpTextField(
+                        margin: EdgeInsets.all(10),
+                        fieldWidth: 48,
+                        enabledBorderColor: Colors.black,
+                        numberOfFields: otpCodeLength,
+                        borderColor: Color(0xFF512DA8),
+                        //set to true to show as box or false to show as dash
+                        showFieldAsBox: true,
+                        //runs when a code is typed in
+                        onSubmit: (value) {
+                          _onOtpCallBack(value, false);
                         },
                       ),
-                      // OTPTextField(
-                      //   length: otpCodeLength,
-                      //   width: MediaQuery.of(context).size.width,
-                      //   fieldWidth: 80,
-                      //   style: TextStyle(
-                      //       fontSize: 17
-                      //   ),
-                      //   textFieldAlignment: MainAxisAlignment.spaceAround,
-                      //   fieldStyle: FieldStyle.underline,
-                      //   onCompleted: (pin) {
-                      //     Provider.of<AuthService>(context, listen: false);
-                      //     // setState(() {
-                      //     //   t1.text = pin;
-                      //     // });
-                      //     _onOtpCallBack(pin, false);
-                      //   },
-                      // ),
                       const Spacer(),
                       Container(
                         height: 50,
@@ -493,6 +472,9 @@ class _OtpPageState extends State<OtpPage> {
                     ),
                   ),
                 ),
+                SizedBox(
+                  height: keyBoardPadding == false ? 0 : 226,
+                )
               ],
             ),
           ),

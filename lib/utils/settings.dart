@@ -32,6 +32,8 @@ List<Color> brandColors1 = [Colors.black, Colors.black];
 
 // Permsission Vars
 List<Contact> contactsCallScreen  = [];
+List<Contact> contacts  = [];
+
 bool allowLoadContacts = false;
 bool allowLoadDialer = true;
 bool allowBluetooth = false;
@@ -46,8 +48,9 @@ const reseller = 'Molweni';
 const parentCompany = 'Noboxtelecoms Telecoms';
 const termsPolicyURL = 'https://dialer.softinvoip/terms.html';
 const companyDetailName = '$reseller-of-$parentCompany';
-const supportNumber = '+27 71 223 9140';
+const supportNumber = '+27712239140';
 const supportWhatsappNumber = '+27 71 223 9140';
+const supportiOSWhatsappNumber = '27712239140';
 const supportEmail = 'clientservices@softinvoip.co.za';
 const contactUsSubject = 'I need your Help';
 const contactUsBody = '';
