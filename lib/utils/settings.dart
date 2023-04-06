@@ -32,7 +32,6 @@ List<Color> brandColors1 = [Colors.black, Colors.black];
 
 // Permsission Vars
 List<Contact> contactsCallScreen  = [];
-List<Contact> contacts  = [];
 
 bool allowLoadContacts = false;
 bool allowLoadDialer = true;
