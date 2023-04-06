@@ -3,11 +3,11 @@ import 'dart:convert';
 import 'package:flutter_countdown_timer/countdown_timer_controller.dart';
 import 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 import 'package:provider/provider.dart';
 import 'package:requests/requests.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sms_otp_auto_verify/sms_otp_auto_verify.dart';
 import '../../utils/AuthService.dart';
 import '../../utils/bottonNavBar.dart';
 import '../../utils/settings.dart';
@@ -293,6 +293,7 @@ class _OtpPageState extends State<OtpPage> {
               "The Mobile Number provided does not exists, Please create an Account";
           myDialog(_message, '/SignUp');
         } else {
+          print("you are logged in");
           Navigator.pushReplacement(context, MaterialPageRoute(
             builder: (context) {
               return BottomNavBar();
@@ -330,6 +331,7 @@ class _OtpPageState extends State<OtpPage> {
         child: Scaffold(
           key: _scaffoldKey,
           body: SingleChildScrollView(
+            reverse: true,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
@@ -406,19 +408,43 @@ class _OtpPageState extends State<OtpPage> {
                           ),
                         ),
                       ),
-                      OtpTextField(
-                        margin: EdgeInsets.all(10),
-                        fieldWidth: 48,
-                        enabledBorderColor: Colors.black,
-                        numberOfFields: otpCodeLength,
-                        borderColor: Color(0xFF512DA8),
-                        //set to true to show as box or false to show as dash
-                        showFieldAsBox: true,
-                        //runs when a code is typed in
-                        onSubmit: (value) {
-                          _onOtpCallBack(value, false);
-                        },
+                      InkWell(onTap: () {
+                        print('object hello');
+                      },
+                        child: TextFieldPin(
+                          textController: t1,
+                          codeLength: otpCodeLength,
+                          defaultBoxSize: 48,
+                          textStyle: const TextStyle(
+                              fontSize: 16, color: appcolor.black),
+                          autoFocus: true,
+                          selectedDecoration: BoxDecoration(
+                            // borderSide: BorderSide.none,
+                              borderRadius: BorderRadius.circular(10)),
+                          onChange: (code) {
+                            Provider.of<AuthService>(context, listen: false);
+                            print("OTP =>>>>>> $code");
+                            _onOtpCallBack(code, false);
+                          },
+                        ),
                       ),
+                      // OtpTextField(
+                      //   autoFocus: true,
+                      //   textStyle:
+                      //       TextStyle(fontSize: 16, color: appcolor.black),
+                      //   margin: EdgeInsets.all(10),
+                      //   fieldWidth: 48,
+                      //   enabledBorderColor: Colors.black,
+                      //   numberOfFields: otpCodeLength,
+                      //   borderColor: Color(0xFF512DA8),
+                      //   //set to true to show as box or false to show as dash
+                      //   showFieldAsBox: true,
+                      //   //runs when a code is typed in
+                      //   onSubmit: (value) {
+                      //     Provider.of<AuthService>(context, listen: false);
+                      //     _onOtpCallBack(value, false);
+                      //   },
+                      // ),
                       const Spacer(),
                       Container(
                         height: 50,
@@ -441,6 +467,7 @@ class _OtpPageState extends State<OtpPage> {
                     ],
                   ),
                 ),
+
                 Align(
                   alignment: Alignment.centerRight,
                   child: Padding(
