@@ -119,7 +119,6 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
   @override
   initState() {
     super.initState();
-    getAllContacts();
     _initRenderers();
     helper!.addSipUaHelperListener(this);
   }
