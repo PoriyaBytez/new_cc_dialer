@@ -17,8 +17,6 @@ class UserList extends StatefulWidget {
 }
 
 class UserListPage extends State<UserList> {
-  List<Contact> contactData = [];
-  List<Contact> contacts = [];
   List<Contact> contactsFiltered = [];
   final Widget? navigationBar = navBarGlobalKey.currentWidget;
 
@@ -27,7 +25,6 @@ class UserListPage extends State<UserList> {
   @override
   void initState() {
     super.initState();
-    getAllContacts();
   }
 
 //#########################################################################################################################################
@@ -50,20 +47,6 @@ class UserListPage extends State<UserList> {
   }
 
 //######################################################################################################################################
-  getAllContacts() async {
-    contacts =
-        (await FlutterContacts.getContacts(withPhoto: false,withProperties: true)).toList();
-
-    //mount is slowing down things
-    if (mounted) {
-      if (!mounted) return;
-      setState(() {
-        contactData = contacts;
-      });
-    }
-  }
-
-//###########################################################################################################################################
 
   String _filterContacts(dynamic user) {
     String searchTerm = user['callednum'];
@@ -73,19 +56,19 @@ class UserListPage extends State<UserList> {
     var numTest2;
     var result;
 
-    if (contactData.isNotEmpty) {
-      for (var i = 0; i < contactData.length; i++) {
-        if (contactData[i].phones.isNotEmpty) {
-          if (contactData[i].phones.elementAt(0).number.isNotEmpty) {
-            numTest2 = contactData[i].phones.elementAt(0).number;
+    if (contactsCallScreen.isNotEmpty) {
+      for (var i = 0; i < contactsCallScreen.length; i++) {
+        if (contactsCallScreen[i].phones.isNotEmpty) {
+          if (contactsCallScreen[i].phones.elementAt(0).number.isNotEmpty) {
+            numTest2 = contactsCallScreen[i].phones.elementAt(0).number;
             phnFlattened = flattenContactNumber(numTest2);
-          } else if (contactData[i].phones.elementAt(1).number.isNotEmpty) {
-            numTest2 = contactData[i].phones.elementAt(1).number;
+          } else if (contactsCallScreen[i].phones.elementAt(1).number.isNotEmpty) {
+            numTest2 = contactsCallScreen[i].phones.elementAt(1).number;
             phnFlattened = flattenContactNumber(numTest2);
           }
 
           if (phnFlattened!.contains(searchTermFlatten)) {
-            result = contactData[i].displayName;
+            result = contactsCallScreen[i].displayName;
             numFound = true;
             break;
           }
