@@ -325,7 +325,7 @@ class _MyCallScreenWidget extends State<CallScreenWidget>
     setState(() {
       _speakerOn = !_speakerOn;
     });
-    Helper.setSpeakerphoneOn(!_speakerOn);
+    Helper.setSpeakerphoneOn(_speakerOn);
     InCallService().proximity(!_speakerOn);
   }
 

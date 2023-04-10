@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:alt_sms_autofill/alt_sms_autofill.dart';
 import 'package:flutter_countdown_timer/countdown_timer_controller.dart';
-import 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:requests/requests.dart';
@@ -11,6 +11,7 @@ import 'package:sms_otp_auto_verify/sms_otp_auto_verify.dart';
 import '../../utils/AuthService.dart';
 import '../../utils/bottonNavBar.dart';
 import '../../utils/settings.dart';
+import 'package:flutter/services.dart';
 
 class OtpPage extends StatefulWidget {
   @override
@@ -36,13 +37,12 @@ class _OtpPageState extends State<OtpPage> {
 
   bool _enableButton = false;
   TextEditingController t1 = TextEditingController();
-  String? _otpCode;
+  String _otpCode = '';
   int _countDown = 120;
   CountdownTimerController? controller;
   int _otpTimeInMS = 1000 * otpStartMinutes * 60;
+  final intRegex = RegExp(r'\d+', multiLine: true);
   bool keyBoardPadding = false;
-
-  // String? _appSignature;
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   Timer? countdownTimer;
   Duration myDuration = Duration(seconds: 30);
@@ -51,10 +51,28 @@ class _OtpPageState extends State<OtpPage> {
   void initState() {
     _timerstart();
     _startCountDown();
+    initSmsListener();
     super.initState();
   }
 
 //##################################################################################################################################
+
+  Future<void> initSmsListener() async {
+    String? commingSms;
+    List otp = [];
+    try {
+      commingSms = await AltSmsAutofill().listenForSms;
+      otp = commingSms!.split(" ");
+      print("your otp ==> ${otp[5]}");
+    } on PlatformException {
+      commingSms = 'Failed to get Sms.';
+    }
+    print("message ==> ${commingSms}");
+    if (!mounted) return;
+    setState(() {
+      t1.text = otp[5];
+    });
+  }
 
   void _timerstart() {
     if (_counter <= 5) {
@@ -85,9 +103,8 @@ class _OtpPageState extends State<OtpPage> {
 
   _onOtpCallBack(String otpCode, bool isAutofill) {
     if (!mounted) return;
-    if (!mounted) return;
+    FocusScope.of(context).unfocus();
     setState(() {
-      FocusScope.of(context).unfocus();
       _otpCode = otpCode;
       if (otpCode.length == otpCodeLength && isAutofill) {
         _otpWasUsed = true;
@@ -257,7 +274,6 @@ class _OtpPageState extends State<OtpPage> {
           myDialog(_message, '/Login');
         } else {
           print('sinup result else==> ${result.body} ');
-
           Navigator.pushReplacement(context, MaterialPageRoute(
             builder: (context) {
               return BottomNavBar();
@@ -325,7 +341,6 @@ class _OtpPageState extends State<OtpPage> {
 
   @override
   Widget build(BuildContext context) {
-    double keyBoardHeight = MediaQuery.of(context).viewInsets.bottom;
     return Form(
         key: _formKey,
         child: Scaffold(
@@ -408,66 +423,46 @@ class _OtpPageState extends State<OtpPage> {
                           ),
                         ),
                       ),
-                      InkWell(onTap: () {
-                        print('object hello');
-                      },
-                        child: TextFieldPin(
-                          textController: t1,
-                          codeLength: otpCodeLength,
-                          defaultBoxSize: 48,
-                          textStyle: const TextStyle(
-                              fontSize: 16, color: appcolor.black),
-                          autoFocus: true,
-                          selectedDecoration: BoxDecoration(
+                      TextFieldPin(
+                        textController: t1,
+                        codeLength: otpCodeLength,
+                        defaultBoxSize: 48,
+                        textStyle: const TextStyle(
+                            fontSize: 16, color: appcolor.black),
+                        autoFocus: true,
+                        selectedDecoration: BoxDecoration(
                             // borderSide: BorderSide.none,
-                              borderRadius: BorderRadius.circular(10)),
-                          onChange: (code) {
-                            Provider.of<AuthService>(context, listen: false);
-                            print("OTP =>>>>>> $code");
-                            _onOtpCallBack(code, false);
-                          },
-                        ),
-                      ),
-                      // OtpTextField(
-                      //   autoFocus: true,
-                      //   textStyle:
-                      //       TextStyle(fontSize: 16, color: appcolor.black),
-                      //   margin: EdgeInsets.all(10),
-                      //   fieldWidth: 48,
-                      //   enabledBorderColor: Colors.black,
-                      //   numberOfFields: otpCodeLength,
-                      //   borderColor: Color(0xFF512DA8),
-                      //   //set to true to show as box or false to show as dash
-                      //   showFieldAsBox: true,
-                      //   //runs when a code is typed in
-                      //   onSubmit: (value) {
-                      //     Provider.of<AuthService>(context, listen: false);
-                      //     _onOtpCallBack(value, false);
-                      //   },
-                      // ),
-                      const Spacer(),
-                      Container(
-                        height: 50,
-                        width: MediaQuery.of(context).size.width / 1.2,
-                        decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.centerLeft,
-                              end: Alignment.centerRight,
-                              colors: brandColors3,
-                            ),
                             borderRadius: BorderRadius.circular(10)),
-                        child: Center(
-                          child: Text('${btnText.toUpperCase()} : $_countDown',
-                              style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 15)),
+                        onChange: (code) {
+                          Provider.of<AuthService>(context, listen: false);
+                          print("OTP =>>>>>> $code");
+                          _onOtpCallBack(code, false);
+                        },
+                      ),
+                      const Spacer(),
+                      InkWell(onTap: () => _verifyOtp(t1.text),
+                        child: Container(
+                          height: 50,
+                          width: MediaQuery.of(context).size.width / 1.2,
+                          decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.centerLeft,
+                                end: Alignment.centerRight,
+                                colors: brandColors3,
+                              ),
+                              borderRadius: BorderRadius.circular(10)),
+                          child: Center(
+                            child: Text('${btnText.toUpperCase()} : $_countDown',
+                                style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15)),
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
-
                 Align(
                   alignment: Alignment.centerRight,
                   child: Padding(
@@ -499,9 +494,6 @@ class _OtpPageState extends State<OtpPage> {
                     ),
                   ),
                 ),
-                SizedBox(
-                  height: keyBoardPadding == false ? 0 : 226,
-                )
               ],
             ),
           ),
@@ -512,5 +504,6 @@ class _OtpPageState extends State<OtpPage> {
   void dispose() {
     super.dispose();
     countdownTimer!.cancel();
+    AltSmsAutofill().unregisterListener();
   }
 }

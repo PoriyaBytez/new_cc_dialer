@@ -86,8 +86,10 @@ class _BottomNavBarState extends State<BottomNavBar> {
 
   Future<bool> askPermission() async {
     FlutterContacts.config.includeNotesOnIos13AndAbove = false;
-    PermissionStatus status = await Permission.contacts.request();
-    if (status.isDenied == true) {
+    Map<Permission, PermissionStatus> status = await [Permission.contacts,Permission.microphone].request();
+    print("status ==> ${status}");
+    if (status == true) {
+
       askPermission();
       setState(() {
         isCheck = false;

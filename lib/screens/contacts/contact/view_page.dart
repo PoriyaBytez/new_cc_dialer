@@ -41,22 +41,10 @@ class _ViewPageState extends State<ViewPage> {
     super.initState();
   }
 
-  Future<void> getApps() async {
-    try {
-      if (Platform.isAndroid) {
-        await AppCheck.checkAvailability('com.whatsapp');
-      } else if (Platform.isIOS) {
-        await AppCheck.checkAvailability('whatsapp://');
-      }
-      existWhatsapp = true;
-    } catch (err) {
-      existWhatsapp = false;
-    }
-  }
+
 
   @override
   Widget build(BuildContext context) {
-    getApps();
     return Scaffold(
       backgroundColor: appcolor.dialmainbackground,
       resizeToAvoidBottomInset: false,

@@ -14,7 +14,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  // HomeBloc bloc = HomeBloc();
 
   Widget appBarTitle = const Text(
     "Contacts",
@@ -33,8 +32,6 @@ class _HomePageState extends State<HomePage> {
   List<Contact> searchContacts = [];
 
   Offset? _tapPosition;
-
-  // Contact? c;
 
   void _onTapDown(TapDownDetails details) {
     _tapPosition = details.globalPosition;
@@ -230,7 +227,6 @@ class _HomePageState extends State<HomePage> {
                             ),
                           ]),
                           onPressed: () {
-                            // bloc.setContact(item);
                             String? phoneNumber =
                             (c.phones.length != 0)
                                 ? c.phones.elementAt(0).number

@@ -3,7 +3,6 @@ import 'package:flutter_contacts/contact.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:sip_ua/sip_ua.dart';
 
-import '../screens/contacts/shared/models/contact.dart';
 
 TextEditingController? textController;
 final SIPUAHelper helper = SIPUAHelper();
