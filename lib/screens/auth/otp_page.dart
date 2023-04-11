@@ -62,15 +62,15 @@ class _OtpPageState extends State<OtpPage> {
     List otp = [];
     try {
       commingSms = await AltSmsAutofill().listenForSms;
+      print("sms ==> $commingSms");
       otp = commingSms!.split(" ");
-      print("your otp ==> ${otp[5]}");
     } on PlatformException {
       commingSms = 'Failed to get Sms.';
     }
-    print("message ==> ${commingSms}");
     if (!mounted) return;
     setState(() {
-      t1.text = otp[5];
+      otpAction == 'login' ?
+      t1.text = otp[5] : t1.text = otp[8];
     });
   }
 
