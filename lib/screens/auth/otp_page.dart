@@ -1,13 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:alt_sms_autofill/alt_sms_autofill.dart';
-import 'package:flutter_countdown_timer/countdown_timer_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:provider/provider.dart';
 import 'package:requests/requests.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sms_otp_auto_verify/sms_otp_auto_verify.dart';
 import '../../utils/AuthService.dart';
 import '../../utils/bottonNavBar.dart';
 import '../../utils/settings.dart';
@@ -36,43 +36,51 @@ class _OtpPageState extends State<OtpPage> {
   bool otpIsCorrect = false;
 
   bool _enableButton = false;
-  TextEditingController t1 = TextEditingController();
+  TextEditingController otpController = TextEditingController();
   String _otpCode = '';
   int _countDown = 120;
-  CountdownTimerController? controller;
   int _otpTimeInMS = 1000 * otpStartMinutes * 60;
   final intRegex = RegExp(r'\d+', multiLine: true);
   bool keyBoardPadding = false;
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   Timer? countdownTimer;
-  Duration myDuration = Duration(seconds: 30);
+  String? otpAuto;
 
   @override
   void initState() {
     _timerstart();
     _startCountDown();
+    // getSMSPermission();
     initSmsListener();
     super.initState();
   }
 
-//##################################################################################################################################
+  // getSMSPermission() async {
+  //   PermissionStatus status = await Permission.sms.request();
+  //   if(status.isDenied){
+  //     getSMSPermission();
+  //   }
+  // }
 
   Future<void> initSmsListener() async {
+
     String? commingSms;
-    List otp = [];
+     List otp = [];
     try {
       commingSms = await AltSmsAutofill().listenForSms;
-      print("sms ==> $commingSms");
       otp = commingSms!.split(" ");
     } on PlatformException {
       commingSms = 'Failed to get Sms.';
     }
     if (!mounted) return;
+
     setState(() {
       otpAction == 'login' ?
-      t1.text = otp[5] : t1.text = otp[8];
+      otpController.text = otp[5]  : otpController.text = otp[8];
     });
+
   }
+//##################################################################################################################################
 
   void _timerstart() {
     if (_counter <= 5) {
@@ -423,24 +431,48 @@ class _OtpPageState extends State<OtpPage> {
                           ),
                         ),
                       ),
-                      TextFieldPin(
-                        textController: t1,
-                        codeLength: otpCodeLength,
-                        defaultBoxSize: 48,
-                        textStyle: const TextStyle(
-                            fontSize: 16, color: appcolor.black),
+                      PinCodeTextField(
                         autoFocus: true,
-                        selectedDecoration: BoxDecoration(
-                            // borderSide: BorderSide.none,
-                            borderRadius: BorderRadius.circular(10)),
-                        onChange: (code) {
-                          Provider.of<AuthService>(context, listen: false);
-                          print("OTP =>>>>>> $code");
-                          _onOtpCallBack(code, false);
+                        appContext: context,
+                        pastedTextStyle: TextStyle(
+                          color: Colors.green.shade600,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        length: otpCodeLength,
+                        pinTheme: PinTheme(
+                          shape: PinCodeFieldShape.box,
+                          fieldOuterPadding: EdgeInsets.all(15),
+                          borderRadius: BorderRadius.circular(5),
+                          fieldHeight: 50,
+                          fieldWidth: 40,
+                          activeFillColor: Colors.white,
+                        ),
+                        cursorColor: Colors.black,
+                        animationDuration: const Duration(milliseconds: 300),
+                        enableActiveFill: true,
+                        controller: otpController,
+                        keyboardType: TextInputType.number,
+                        boxShadows: const [
+                          BoxShadow(
+                            offset: Offset(0, 1),
+                            color: Colors.black12,
+                            blurRadius: 10,
+                          )
+                        ],
+                        onCompleted: (v) {
+                          _onOtpCallBack(v, false);
+                        },
+                        beforeTextPaste: (text) {
+                          debugPrint("Allowing to paste $text");
+                          return true;
+                        },
+                        onChanged: (String value) {
+                          setState(() {});
                         },
                       ),
                       const Spacer(),
-                      InkWell(onTap: () => _verifyOtp(t1.text),
+                      InkWell(
+                        onTap: () => _verifyOtp(otpController.text),
                         child: Container(
                           height: 50,
                           width: MediaQuery.of(context).size.width / 1.2,
@@ -452,7 +484,8 @@ class _OtpPageState extends State<OtpPage> {
                               ),
                               borderRadius: BorderRadius.circular(10)),
                           child: Center(
-                            child: Text('${btnText.toUpperCase()} : $_countDown',
+                            child: Text(
+                                '${btnText.toUpperCase()} : $_countDown',
                                 style: const TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold,

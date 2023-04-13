@@ -157,31 +157,21 @@ class _MyDialPadWidget extends State<DialPadWidget>
     } else {
       if (dest == null || dest!.isEmpty) {
         if (mounted) {
-          setState(() {
-            textController.text = _lastDialed.toString();
-            dest = _lastDialed.toString();
-          });
+          // setState(() {
+          //   textController.text = _lastDialed.toString();
+          //   dest = _lastDialed.toString();
+          // });
         }
       }
-      final mediaConstraints = <String, dynamic>{'audio': true, 'video': true};
-
-      MediaStream mediaStream;
-
-      if (kIsWeb && !voiceonly) {
-        mediaStream =
-        await navigator.mediaDevices.getDisplayMedia(mediaConstraints);
-        mediaConstraints['video'] = false;
-        MediaStream userStream =
-        await navigator.mediaDevices.getUserMedia(mediaConstraints);
-        mediaStream.addTrack(userStream.getAudioTracks()[0], addToNative: true);
-      }
-
+      if(textController.text.isNotEmpty) {
       dest = textController.text;
+      print("dest ==> $dest");
       _lastDialed = textController.text;
       _preferences!.setString('dest', dest!);
       helper!.call(dest!.replaceFirst('00', ''),
-          voiceonly: voiceonly); //voiceonly
+            voiceonly: voiceonly); //voiceonly
       ProximityScreenLock.setActive(true);
+      }
       return null;
     }
     return null;

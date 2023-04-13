@@ -2,7 +2,7 @@ import 'package:country_picker/country_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
-import 'package:sms_otp_auto_verify/sms_otp_auto_verify.dart';
+// import 'package:sms_otp_auto_verify/sms_otp_auto_verify.dart';
 
 import '../../utils/settings.dart';
 
@@ -34,18 +34,18 @@ class _SignUpPageState extends State<SignUpPage> {
 
   @override
   void initState() {
-    _getSignatureCode();
+    // _getSignatureCode();
     super.initState();
   }
 
-  _getSignatureCode() async {
-    String? signature = await SmsVerification.getAppSignature();
-    print(
-        "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
-    print("signature0 $signature");
-    print(
-        "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
-  }
+  // _getSignatureCode() async {
+  //   String? signature = await SmsVerification.getAppSignature();
+  //   print(
+  //       "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+  //   print("signature0 $signature");
+  //   print(
+  //       "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+  // }
 
 //#########################################################################################################################################################################
   String? validateMobile(String? value) {

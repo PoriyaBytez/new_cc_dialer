@@ -5,16 +5,9 @@ import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:new_cc_dialer/utils/permissions_service.dart';
 import 'package:new_cc_dialer/utils/settings.dart';
-
-// import 'package:open_whatsapp/open_whatsapp.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:requests/requests.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher.dart';
-
 import '../screens/auth/access_required.dart';
 import '../screens/callhistory/call-list.dart';
 import '../screens/contacts/app_module.dart';
@@ -47,6 +40,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
   void initState() {
     super.initState();
     askPermission();
+    checkData();
   }
 
 //############################################################################################################
@@ -81,15 +75,12 @@ class _BottomNavBarState extends State<BottomNavBar> {
         ).show();
       }
     }
-    ;
   }
 
   Future<bool> askPermission() async {
     FlutterContacts.config.includeNotesOnIos13AndAbove = false;
     Map<Permission, PermissionStatus> status = await [Permission.contacts,Permission.microphone].request();
-    print("status ==> ${status}");
     if (status == true) {
-
       askPermission();
       setState(() {
         isCheck = false;
@@ -103,62 +94,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
       return true;
     }
   }
-
   bool isCheck = false;
-
-//############################################################################################################
-  checkContactPermission() async {
-    PermissionService().hasPermission(Permission.contacts).then((value) async {
-      if (value) {
-        setState(() {
-          allowLoadContacts = true;
-        });
-      } else {
-        await _askContactPermissions().then((value) {
-          // if (value) {
-          //   if (!mounted) return;
-          //   setState(() {
-          //     allowLoadContacts = true;
-          //   });
-          // } else {
-          //   if (!mounted) return;
-          //   setState(() {
-          //     allowLoadContacts = false;
-          //   });
-          // }
-        });
-      }
-    });
-  }
-
-//############################################################################################################
-  Future<bool> _askContactPermissions() async {
-    Future<bool> val =
-        PermissionService().requestPermissionContacts(onPermissionDenied: () {
-      // Alert(
-      //   context: context,
-      //   type: AlertType.warning,
-      //   title: "ACCESS DENIED !",
-      //   desc:
-      //       "To CALL from your contacts, you need to ALLOW the app to read and sync your contacts in the phone settings ! Restart the application afterwards",
-      //   buttons: [
-      //     DialogButton(
-      //       onPressed: () {
-      //         openAppSettings();
-      //       },
-      //       gradient: LinearGradient(
-      //         colors: [Colors.grey.shade300, Colors.grey.shade300],
-      //       ),
-      //       child: const Text(
-      //         "COOL",
-      //         style: TextStyle(color: Colors.black, fontSize: 20),
-      //       ),
-      //     )
-      //   ],
-      // ).show();
-    });
-    return Future.value(val);
-  }
 
    myDialog(context) {
     return  showDialog(
@@ -243,10 +179,6 @@ class _BottomNavBarState extends State<BottomNavBar> {
     return WillPopScope(
         onWillPop: () => myDialog(context),
         child: Scaffold(
-          // appBar: AppBar(title: Text("Text"),leading: InkWell(
-          //     onTap: (){
-          //       myDialog();
-          //     },child: Icon(Icons.arrow_back)),),
           backgroundColor: appcolor.dialmainbackground,
           key: _scaffoldKey,
           body: _children[pageIndex], //_children(pageIndex),
