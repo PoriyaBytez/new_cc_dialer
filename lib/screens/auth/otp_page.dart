@@ -55,13 +55,6 @@ class _OtpPageState extends State<OtpPage> {
     super.initState();
   }
 
-  // getSMSPermission() async {
-  //   PermissionStatus status = await Permission.sms.request();
-  //   if(status.isDenied){
-  //     getSMSPermission();
-  //   }
-  // }
-
   Future<void> initSmsListener() async {
 
     String? commingSms;
@@ -78,7 +71,6 @@ class _OtpPageState extends State<OtpPage> {
       otpAction == 'login' ?
       otpController.text = otp[5]  : otpController.text = otp[8];
     });
-
   }
 //##################################################################################################################################
 
